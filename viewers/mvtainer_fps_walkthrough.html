@@ -144,7 +144,7 @@
     scene.fog = new THREE.FogExp2(0x060c18, 0.035);
 
     const camera = new THREE.PerspectiveCamera(72, window.innerWidth / window.innerHeight, 0.1, 80);
-    camera.position.set(2.0, 1.6, -1.8); // Start in Living Room
+    camera.position.set(2.4, 1.6, -2.75); // Start in Living Room (Exact Center of 4.2m Lounge)
 
     const renderer = new THREE.WebGLRenderer({ 
       antialias: true, 
@@ -260,6 +260,11 @@
     const matDeck = new THREE.MeshStandardMaterial({ map: texDeck, roughness: 0.6 });
     // Optimized transparent standard material instead of heavy MeshPhysicalMaterial
     const matGlass = new THREE.MeshStandardMaterial({ color: 0xa5f3fc, transparent: true, opacity: 0.35, roughness: 0.1, metalness: 0.1 });
+    const matGlassDoor = new THREE.MeshStandardMaterial({ color: 0xbae6fd, transparent: true, opacity: 0.5, roughness: 0.1, metalness: 0.2 });
+    const matDoorOak = new THREE.MeshStandardMaterial({ color: 0xa16207, roughness: 0.5 });
+    const matDoorSteel = new THREE.MeshStandardMaterial({ color: 0x065f46, roughness: 0.4, metalness: 0.5 });
+    const matDoorFrame = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.5, metalness: 0.3 });
+    const matChrome = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, roughness: 0.1, metalness: 0.9 });
     const matAisleOak = new THREE.MeshStandardMaterial({ color: 0xb45309, roughness: 0.4 });
     const matSofa = new THREE.MeshStandardMaterial({ color: 0x2563eb, roughness: 0.9 });
     const matSoundproofWall = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.7 });
@@ -270,16 +275,16 @@
 
     // Sole Shadow-Casting Light: Natural Sunlight through South Patio Glass (1024x1024)
     const sunLight = new THREE.DirectionalLight(0xfffaed, 1.25);
-    sunLight.position.set(4, 7, -5);
+    sunLight.position.set(5.0, 9.0, -7.0);
     sunLight.castShadow = true;
     sunLight.shadow.mapSize.width = 1024;
     sunLight.shadow.mapSize.height = 1024;
     sunLight.shadow.camera.near = 0.5;
-    sunLight.shadow.camera.far = 20;
-    sunLight.shadow.camera.left = -5.5;
-    sunLight.shadow.camera.right = 5.5;
-    sunLight.shadow.camera.top = 5.5;
-    sunLight.shadow.camera.bottom = -5.5;
+    sunLight.shadow.camera.far = 25;
+    sunLight.shadow.camera.left = -6.5;
+    sunLight.shadow.camera.right = 6.5;
+    sunLight.shadow.camera.top = 6.5;
+    sunLight.shadow.camera.bottom = -6.5;
     sunLight.shadow.bias = -0.0008;
     scene.add(sunLight);
 
@@ -300,15 +305,16 @@
       return p;
     }
 
-    addDownlight(2.0, 2.3, -1.8, 0xffecd2, 1.4); // Living room center
-    addDownlight(-0.5, 2.3, -1.8, 0xffe4b5, 1.5); // Island dining
-    addDownlight(-3.3, 2.3, -1.8, 0xdbeafe, 1.0); // Entryway vestibule
-    addDownlight(2.8, 2.3, 0.0, 0xbae6fd, 0.8, 3.5); // Breezeway
-    addDownlight(-2.8, 2.3, 1.8, 0xffe8d6, 1.2); // Master bedroom
-    addDownlight(0.2, 2.3, 1.8, 0x60a5fa, 1.6); // Dev workspace
-    addDownlight(3.2, 2.3, 1.8, 0xffffff, 1.3); // 3-way bathroom powder
+    // 7 Ceiling Downlights aligned to 1:1 Architectural Grid
+    addDownlight(2.4, 2.39, -2.75, 0xffecd2, 1.4); // Wing A Living room center
+    addDownlight(-1.2, 2.39, -2.75, 0xffe4b5, 1.5); // Wing A Island dining
+    addDownlight(-3.6, 2.39, -2.75, 0xdbeafe, 1.0); // Wing A Entryway vestibule
+    addDownlight(3.4, 2.39, 0.0, 0xbae6fd, 1.1, 4.5); // Insulated Breezeway (2.2m x 2.5m)
+    addDownlight(-2.9, 2.39, 2.75, 0xffe8d6, 1.2); // Wing B Master bedroom
+    addDownlight(0.3, 2.39, 2.75, 0x60a5fa, 1.6); // Wing B Smart workspace
+    addDownlight(3.2, 2.39, 2.75, 0xffffff, 1.3); // Wing B 3-way bathroom powder
 
-    // 6. Architectural Geometry Assembly
+    // 6. Architectural Geometry Assembly (Accurate 1:1 Blueprint Scale)
     function createBox(w, h, d, x, y, z, mat, castShadow = true, receiveShadow = true) {
       const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
       mesh.position.set(x, y, z);
@@ -318,105 +324,192 @@
       return mesh;
     }
 
-    // Floors
-    createBox(8.8, 0.1, 2.7, 0, -0.05, -1.8, matWoodFloor, false, true); // Wing A Main Floor
-    createBox(1.8, 0.12, 2.7, -3.5, -0.04, -1.8, matTileFloor, false, true); // Wing A Entry Tile
-    createBox(8.8, 0.1, 2.7, 0, -0.05, 1.8, matWoodFloor, false, true); // Wing B Main Floor
-    createBox(2.6, 0.12, 2.7, 3.1, -0.04, 1.8, matTileFloor, false, true); // Wing B Bathroom Tile
-    createBox(1.6, 0.1, 0.9, 2.8, -0.05, 0, matWoodFloor, false, true); // Breezeway Floor
-    createBox(5.0, 0.15, 0.9, -0.5, -0.075, 0, matDeck, false, true); // Courtyard Deck
+    // Floors (Accurate 9.0m x 3.0m Containers + 2.5m Courtyard)
+    createBox(9.0, 0.1, 3.0, 0, -0.05, -2.75, matWoodFloor, false, true); // Wing A Living/Kitchen Wood Floor
+    createBox(1.8, 0.12, 3.0, -3.6, -0.04, -2.75, matTileFloor, false, true); // Wing A Entry Vestibule Tile
+    createBox(9.0, 0.1, 3.0, 0, -0.05, 2.75, matWoodFloor, false, true); // Wing B Bed/Work Wood Floor
+    createBox(2.6, 0.12, 3.0, 3.2, -0.04, 2.75, matTileFloor, false, true); // Wing B Bathroom Hotel Tile
+    createBox(2.2, 0.1, 2.5, 3.4, -0.05, 0.0, matWoodFloor, false, true); // Breezeway Floor (2.2m x 2.5m)
+    createBox(6.8, 0.15, 2.5, -1.1, -0.075, 0.0, matDeck, false, true); // Bangkirai Courtyard Deck (6.8m x 2.5m)
 
-    // Ceilings
-    createBox(8.8, 0.1, 2.7, 0, 2.45, -1.8, matCeiling, false, false);
-    createBox(8.8, 0.1, 2.7, 0, 2.45, 1.8, matCeiling, false, false);
-    createBox(1.6, 0.1, 0.9, 2.8, 2.45, 0, matCeiling, false, false);
+    // Ceilings (Height: 2.40m)
+    createBox(9.0, 0.1, 3.0, 0, 2.45, -2.75, matCeiling, false, false);
+    createBox(9.0, 0.1, 3.0, 0, 2.45, 2.75, matCeiling, false, false);
+    createBox(2.2, 0.1, 2.5, 3.4, 2.45, 0.0, matCeiling, false, false);
 
-    // Exterior Shell Walls
-    // Wing A Outer Walls
-    createBox(8.8, 2.4, 0.15, 0, 1.2, -3.225, matWall); // North Wall
-    createBox(0.15, 2.4, 2.7, -4.475, 1.2, -1.8, matWall); // West End Wall
-    createBox(0.15, 2.4, 2.7, 4.475, 1.2, -1.8, matWall); // East End Wall
-    // Wing A South Wall (with opening for Breezeway and Patio Glass)
-    createBox(3.0, 2.4, 0.15, -3.0, 1.2, -0.375, matWall);
-    createBox(0.8, 2.4, 0.15, 4.0, 1.2, -0.375, matWall);
-    createBox(3.0, 2.2, 0.05, 1.0, 1.1, -0.375, matGlass, false, false); // 3m South Patio Slider W2/D3
+    // ================= EXTERIOR SHELL WALLS (150mm Urethane Panels) =================
+    // [Wing A: 공용 생활동 (9.0m x 3.0m / Z: -4.25 ~ -1.25)]
+    // North Wall (Z = -4.325) with W1 Kitchen Window (1,200 x 600mm)
+    createBox(2.4, 2.4, 0.15, -3.3, 1.2, -4.325, matWall); // West solid wall
+    createBox(1.2, 1.1, 0.15, -1.5, 0.55, -4.325, matWall); // W1 Window sill
+    createBox(1.2, 0.6, 0.05, -1.5, 1.4, -4.325, matGlass, false, false); // W1 Window pane
+    createBox(1.2, 0.7, 0.15, -1.5, 2.05, -4.325, matWall); // W1 Window header
+    createBox(5.4, 2.4, 0.15, 1.8, 1.2, -4.325, matWall); // East solid wall
 
-    // Wing B Outer Walls
-    createBox(8.8, 2.4, 0.15, 0, 1.2, 3.225, matWall); // South Wall
-    createBox(0.15, 2.4, 2.7, -4.475, 1.2, 1.8, matWall); // West End Wall
-    createBox(0.15, 2.4, 2.7, 4.475, 1.2, 1.8, matWall); // East End Wall
-    createBox(6.4, 2.4, 0.15, -1.3, 1.2, 0.375, matWall);
-    createBox(0.8, 2.4, 0.15, 4.0, 1.2, 0.375, matWall);
+    // West Wall (X = -4.575) with D1 Main Entrance Door (900mm)
+    createBox(0.15, 2.4, 1.05, -4.575, 1.2, -3.725, matWall); // North wall
+    createBox(0.15, 0.3, 0.9, -4.575, 2.25, -2.75, matWall); // D1 Door header
+    createBox(0.06, 2.1, 0.9, -4.575, 1.05, -2.75, new THREE.MeshStandardMaterial({ color: 0x10b981, roughness: 0.5 })); // D1 Steel door
+    createBox(0.15, 2.4, 1.05, -4.575, 1.2, -1.775, matWall); // South wall
 
-    // Insulated Breezeway Walls (150mm Urethane + W7 Window)
-    createBox(0.15, 2.4, 0.9, 3.675, 1.2, 0, matWall); // East solid wall
-    createBox(0.15, 0.8, 0.9, 1.925, 0.4, 0, matWall); // West Lower wall
-    createBox(0.15, 0.6, 0.9, 1.925, 2.1, 0, matWall); // West Upper wall
-    createBox(0.05, 1.0, 0.9, 1.925, 1.3, 0, matGlass, false, false); // W7 Window Pane
+    // East Wall (X = 4.575)
+    createBox(0.15, 2.4, 3.0, 4.575, 1.2, -2.75, matWall);
+
+    // South Wall (Z = -1.175) with W2/D3 3m Patio Slider & Breezeway Opening
+    createBox(5.0, 2.4, 0.15, -2.0, 1.2, -1.175, matWall); // Kitchen/Entry solid wall
+    createBox(1.8, 0.2, 0.15, 1.4, 2.3, -1.175, matWall); // Patio header
+    createBox(1.8, 2.2, 0.05, 1.4, 1.1, -1.175, matGlass, false, false); // W2/D3 Patio slider (courtyard view)
+    // Opening at X: 2.3 ~ 4.5 (Breezeway passage)
+
+    // [Wing B: 프라이빗 침실·작업·욕실동 (9.0m x 3.0m / Z: +1.25 ~ +4.25)]
+    // South Wall (Z = +4.325) with W5 Workroom Window & W6 Bath Vent
+    createBox(4.05, 2.4, 0.15, -2.475, 1.2, 4.325, matWall); // Bedroom south wall
+    createBox(1.5, 0.6, 0.15, 0.3, 0.3, 4.325, matWall); // W5 Window sill
+    createBox(1.5, 1.2, 0.05, 0.3, 1.2, 4.325, matGlass, false, false); // W5 Window pane (1,500 x 1,200mm)
+    createBox(1.5, 0.6, 0.15, 0.3, 2.1, 4.325, matWall); // W5 Window header
+    createBox(3.45, 2.4, 0.15, 2.775, 1.2, 4.325, matWall); // Bathroom south wall
+
+    // West Wall (X = -4.575)
+    createBox(0.15, 2.4, 3.0, -4.575, 1.2, 2.75, matWall);
+
+    // East Wall (X = 4.575)
+    createBox(0.15, 2.4, 3.0, 4.575, 1.2, 2.75, matWall);
+
+    // North Wall (Z = +1.175) with W4 Bedroom Panorama Window (1,800 x 1,800mm)
+    createBox(0.7, 2.4, 0.15, -4.15, 1.2, 1.175, matWall); // Bedroom corner wall
+    createBox(1.8, 0.3, 0.15, -2.9, 0.15, 1.175, matWall); // W4 Window sill
+    createBox(1.8, 1.8, 0.05, -2.9, 1.2, 1.175, matGlass, false, false); // W4 Panorama window (courtyard view)
+    createBox(1.8, 0.3, 0.15, -2.9, 2.25, 1.175, matWall); // W4 Window header
+    createBox(4.3, 2.4, 0.15, 0.15, 1.2, 1.175, matWall); // Bedroom/Studio north wall (-2.0 to +2.3)
+
+    // ★ D7 Breezeway-to-Wing B Doorway Frame & Portal (X: 2.3 to 3.2, Z = 1.175)
+    createBox(0.9, 0.3, 0.15, 2.75, 2.25, 1.175, matWall); // D7 Doorway lintel/header
+    createBox(0.06, 2.1, 0.15, 2.33, 1.05, 1.175, matDoorFrame); // West door jamb
+    createBox(0.06, 2.1, 0.15, 3.17, 1.05, 1.175, matDoorFrame); // East door jamb
+    createBox(0.88, 0.08, 0.10, 2.75, 2.14, 1.175, matDoorFrame); // Top sliding door track
+    createBox(0.32, 2.05, 0.04, 3.02, 1.05, 1.175, matDoorOak); // Open sliding door leaf (parked at east jamb, open passage X: 2.36 ~ 2.86)
+
+    // ★ Wing B Bathroom North Solid Exterior Wall (X: 3.2 to 4.5, Z = 1.175) - 복도에서 욕실 벽 관통 원천 차단
+    createBox(1.3, 2.4, 0.15, 3.85, 1.2, 1.175, matWall);
+
+    // [Insulated Breezeway Walls: 폭 2.2m x 길이 2.5m (Z: -1.25 ~ +1.25)]
+    createBox(0.15, 2.4, 2.5, 4.575, 1.2, 0.0, matWall); // East fully-insulated security wall
+    createBox(0.15, 0.8, 2.5, 2.225, 0.4, 0.0, matWall); // West lower wall
+    createBox(0.15, 0.4, 2.5, 2.225, 2.2, 0.0, matWall); // West upper wall
+    createBox(0.15, 1.2, 0.6, 2.225, 1.4, -0.95, matWall); // North corner wall
+    createBox(0.15, 1.2, 0.6, 2.225, 1.4, 0.95, matWall); // South corner wall
+    createBox(0.05, 1.2, 1.3, 2.225, 1.4, 0.0, matGlass, false, false); // W7 Tilt-turn window pane (1,300 x 1,200mm)
 
     // ================= WING A INTERIOR FURNITURE =================
-    // 1. Entry Clean Vestibule (X: -4.4 to -2.6)
-    createBox(0.5, 2.2, 1.8, -4.1, 1.1, -2.2, new THREE.MeshStandardMaterial({ color: 0x475569 }));
-    createBox(0.1, 1.1, 0.3, -3.7, 1.3, -3.05, new THREE.MeshStandardMaterial({ color: 0x059669 }));
-    createBox(0.6, 0.6, 0.05, -3.7, 1.7, -3.05, new THREE.MeshStandardMaterial({ color: 0x0f172a }));
-    createBox(0.6, 0.6, 0.05, -3.7, 0.9, -3.05, new THREE.MeshStandardMaterial({ color: 0x0f172a }));
+    // 1. Entry Clean Vestibule (X: -4.5 to -2.7)
+    // 2-Person Large Shoe Cabinet (1,200 x 400 x 2,200mm)
+    createBox(1.2, 2.2, 0.4, -3.8, 1.1, -4.0, new THREE.MeshStandardMaterial({ color: 0x334155 }));
+    // Outer Coat / Styler Bench (600 x 400 x 1,900mm)
+    createBox(0.6, 1.9, 0.4, -2.8, 0.95, -4.0, new THREE.MeshStandardMaterial({ color: 0x1e1b4b }));
+    // INFIZA InnovCycle 18 Gravel Bike Wall Mount
+    createBox(1.75, 0.95, 0.25, -3.6, 1.4, -1.45, new THREE.MeshStandardMaterial({ color: 0x06b6d4, roughness: 0.3 }));
+    // ★ D2 3-Slide Vestibule Partition Door Frame & Wall
+    createBox(0.12, 2.4, 0.9, -2.7, 1.2, -3.8, matWall); // North partition wall
+    createBox(0.12, 2.4, 0.9, -2.7, 1.2, -1.7, matWall); // South partition wall
+    createBox(0.14, 0.1, 1.2, -2.7, 2.35, -2.75, matDoorFrame); // Top sliding track
+    createBox(0.03, 2.2, 0.42, -2.73, 1.1, -3.15, matGlassDoor); // D2 Slide pane 1
+    createBox(0.03, 2.2, 0.42, -2.70, 1.1, -2.95, matGlassDoor); // D2 Slide pane 2 (open passage Z: -2.75 to -2.15)
+    createBox(0.03, 2.2, 0.42, -2.67, 1.1, -2.95, matGlassDoor); // D2 Slide pane 3
 
-    // 2. Kitchen & 1,800mm Island Dining Bar (X: -2.6 to +0.5)
-    createBox(2.2, 0.85, 0.65, -1.4, 0.425, -2.8, new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.3 }));
-    createBox(2.2, 0.65, 0.35, -1.4, 1.9, -2.95, new THREE.MeshStandardMaterial({ color: 0x334155 }));
-    // 1,800mm x 800mm Island Dining Counter (Scenario 1 Key Anchor)
-    createBox(1.8, 0.85, 0.8, -0.6, 0.425, -1.6, matAisleOak, true, true);
-    // 2 Bar Stools
-    createBox(0.35, 0.65, 0.35, -1.0, 0.325, -0.9, new THREE.MeshStandardMaterial({ color: 0x1e293b }));
-    createBox(0.35, 0.65, 0.35, -0.2, 0.325, -0.9, new THREE.MeshStandardMaterial({ color: 0x1e293b }));
+    // 2. Kitchen & 1,800mm Island Dining Bar (X: -2.7 to +0.3)
+    createBox(2.2, 0.85, 0.65, -1.6, 0.425, -3.875, new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.3 })); // Sink counter
+    createBox(2.2, 0.65, 0.35, -1.6, 2.05, -4.025, new THREE.MeshStandardMaterial({ color: 0x334155 })); // Upper cabinets
+    createBox(0.8, 1.85, 0.75, -0.1, 0.925, -3.825, new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.2 })); // French door fridge
+    // ★ 1,800mm x 800mm Island Dining Counter (Scenario 1 Key Anchor)
+    createBox(1.8, 0.85, 0.8, -1.2, 0.425, -2.5, matAisleOak, true, true);
+    // 4 Bar Stools (2-Person Face-to-Face Dining)
+    createBox(0.35, 0.65, 0.35, -1.6, 0.325, -3.1, new THREE.MeshStandardMaterial({ color: 0x1e293b }));
+    createBox(0.35, 0.65, 0.35, -0.8, 0.325, -3.1, new THREE.MeshStandardMaterial({ color: 0x1e293b }));
+    createBox(0.35, 0.65, 0.35, -1.6, 0.325, -1.9, new THREE.MeshStandardMaterial({ color: 0x1e293b }));
+    createBox(0.35, 0.65, 0.35, -0.8, 0.325, -1.9, new THREE.MeshStandardMaterial({ color: 0x1e293b }));
 
-    // 3. Living Room (X: +0.5 to +4.4)
-    createBox(2.1, 0.75, 0.95, 2.5, 0.375, -2.5, matSofa, true, true);
-    createBox(2.1, 0.45, 0.25, 2.5, 0.75, -3.0, matSofa, true, true);
-    createBox(1.0, 0.35, 0.5, 2.5, 0.175, -1.6, new THREE.MeshStandardMaterial({ color: 0x78350f }), true, true);
-    createBox(0.08, 0.95, 1.7, 4.38, 1.35, -1.8, new THREE.MeshBasicMaterial({ color: 0x0284c7 }));
-    createBox(0.04, 0.91, 1.66, 4.35, 1.35, -1.8, new THREE.MeshBasicMaterial({ color: 0x0f172a }));
+    // 3. Living Room Lounge (X: +0.3 to +4.5)
+    createBox(2.2, 0.75, 0.85, 2.4, 0.375, -3.775, matSofa, true, true); // 3-4P Fabric sofa
+    createBox(1.0, 0.35, 0.5, 2.4, 0.175, -2.5, new THREE.MeshStandardMaterial({ color: 0x78350f }), true, true); // Tea table
+    createBox(0.08, 0.95, 1.7, 4.45, 1.35, -2.75, new THREE.MeshBasicMaterial({ color: 0x0284c7 })); // 65" TV Bezel
+    createBox(0.04, 0.91, 1.66, 4.42, 1.35, -2.75, new THREE.MeshBasicMaterial({ color: 0x0f172a })); // 65" TV Screen
+
+    // ================= COURTYARD OUTDOOR FURNITURE =================
+    createBox(1.2, 0.65, 0.7, -1.1, 0.325, 0.0, new THREE.MeshStandardMaterial({ color: 0x78350f })); // Courtyard table
+    createBox(1.2, 0.45, 0.3, -1.1, 0.225, -0.7, new THREE.MeshStandardMaterial({ color: 0x451a03 })); // North bench
+    createBox(1.2, 0.45, 0.3, -1.1, 0.225, 0.7, new THREE.MeshStandardMaterial({ color: 0x451a03 })); // South bench
+    createBox(1.0, 1.6, 0.6, -3.8, 0.8, -0.5, new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.3 })); // Bike maintenance shed
 
     // ================= WING B INTERIOR FURNITURE =================
-    // 1. Master Bedroom (X: -4.4 to -1.4)
-    createBox(1.6, 0.45, 2.05, -2.9, 0.225, 1.8, new THREE.MeshStandardMaterial({ color: 0xf1f5f9 }));
-    createBox(1.5, 0.15, 1.4, -2.9, 0.48, 1.95, new THREE.MeshStandardMaterial({ color: 0x0284c7 }));
-    createBox(0.6, 0.12, 0.4, -3.3, 0.52, 0.95, new THREE.MeshStandardMaterial({ color: 0xffffff }));
-    createBox(0.6, 0.12, 0.4, -2.5, 0.52, 0.95, new THREE.MeshStandardMaterial({ color: 0xffffff }));
-    createBox(0.4, 0.5, 0.4, -4.0, 0.25, 0.95, new THREE.MeshStandardMaterial({ color: 0x78350f }));
-    createBox(2.6, 2.2, 0.6, -2.9, 1.1, 2.85, new THREE.MeshStandardMaterial({ color: 0x334155 }));
+    // 1. Master Bedroom (X: -4.5 to -1.3)
+    // ★ 1,500 x 2,000mm Queen Bed + 4 Underbed Drawers
+    createBox(1.5, 0.45, 2.0, -2.9, 0.225, 2.75, new THREE.MeshStandardMaterial({ color: 0xf1f5f9 }));
+    createBox(1.4, 0.15, 1.4, -2.9, 0.48, 2.9, new THREE.MeshStandardMaterial({ color: 0x0284c7 }));
+    createBox(0.55, 0.12, 0.35, -3.3, 0.52, 1.95, new THREE.MeshStandardMaterial({ color: 0xffffff })); // Pillow 1
+    createBox(0.55, 0.12, 0.35, -2.5, 0.52, 1.95, new THREE.MeshStandardMaterial({ color: 0xffffff })); // Pillow 2
+    createBox(0.4, 0.5, 0.4, -3.9, 0.25, 1.95, new THREE.MeshStandardMaterial({ color: 0x78350f })); // Left nightstand
+    createBox(0.4, 0.5, 0.4, -1.9, 0.25, 1.95, new THREE.MeshStandardMaterial({ color: 0x78350f })); // Right nightstand
+    createBox(2.2, 2.2, 0.6, -2.9, 1.1, 3.9, new THREE.MeshStandardMaterial({ color: 0x334155 })); // 4-Door Wardrobe
 
-    // Soundproof Stud Wall (2P Gypsum + 50K Glasswool between Bedroom & Dev Studio)
-    createBox(0.08, 2.4, 2.7, -1.4, 1.2, 1.8, matSoundproofWall);
+    // ★ Double-Stud Acoustic Partition & D6 Pocket Door between Bedroom & Dev Studio
+    createBox(0.12, 2.4, 0.8, -1.3, 1.2, 1.65, matSoundproofWall); // North stud wall
+    createBox(0.12, 0.3, 1.0, -1.3, 2.25, 2.55, matSoundproofWall); // D6 Door header wall
+    createBox(0.14, 0.08, 1.0, -1.3, 2.1, 2.55, matDoorFrame); // D6 Pocket sliding track
+    createBox(0.05, 2.1, 0.35, -1.3, 1.05, 2.22, matDoorOak); // D6 Recessed pocket door panel
+    createBox(0.06, 0.15, 0.04, -1.3, 1.05, 2.35, matChrome); // D6 Recessed handle
+    createBox(0.12, 2.4, 1.2, -1.3, 1.2, 3.65, matSoundproofWall); // South stud wall
 
-    // 2. Developer Studio & Sub Dressroom (X: -1.4 to +1.8)
-    createBox(1.5, 0.74, 0.8, -0.4, 0.37, 2.7, new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.3 }));
-    const mon1 = createBox(0.65, 0.38, 0.05, -0.68, 0.98, 2.9, new THREE.MeshStandardMaterial({ map: texScreen, emissive: 0x0284c7, emissiveIntensity: 0.4 }));
+    // 2. Developer Studio & Sub Dressroom (X: -1.3 to +1.9)
+    // ★ 1,500 x 750mm Coding Desk
+    createBox(1.5, 0.74, 0.75, 0.3, 0.37, 1.7, new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.3 }));
+    const mon1 = createBox(0.65, 0.38, 0.05, 0.0, 0.98, 1.45, new THREE.MeshStandardMaterial({ map: texScreen, emissive: 0x0284c7, emissiveIntensity: 0.4 }));
     mon1.rotation.y = 0.15;
-    const mon2 = createBox(0.65, 0.38, 0.05, 0.0, 0.98, 2.9, new THREE.MeshStandardMaterial({ map: texScreen, emissive: 0x0284c7, emissiveIntensity: 0.4 }));
+    const mon2 = createBox(0.65, 0.38, 0.05, 0.65, 0.98, 1.45, new THREE.MeshStandardMaterial({ map: texScreen, emissive: 0x0284c7, emissiveIntensity: 0.4 }));
     mon2.rotation.y = -0.15;
-    createBox(0.55, 0.5, 0.55, -0.4, 0.45, 2.0, new THREE.MeshStandardMaterial({ color: 0x475569 }));
-    createBox(0.5, 0.6, 0.1, -0.4, 0.85, 1.75, new THREE.MeshStandardMaterial({ color: 0x334155 }));
-    createBox(0.85, 2.1, 0.55, 1.1, 1.05, 2.85, new THREE.MeshStandardMaterial({ color: 0x334155 }));
-    createBox(0.55, 1.9, 0.6, 1.8, 0.95, 2.85, new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.2 }));
+    createBox(0.55, 0.5, 0.55, 0.3, 0.45, 2.4, new THREE.MeshStandardMaterial({ color: 0x475569 })); // Chair base
+    createBox(0.5, 0.6, 0.1, 0.3, 0.85, 2.65, new THREE.MeshStandardMaterial({ color: 0x334155 })); // Chair back
+    // ★ 1,500 x 600mm Sub Dressroom & Styler
+    createBox(1.5, 2.1, 0.6, 0.3, 1.05, 3.9, new THREE.MeshStandardMaterial({ color: 0x1e293b }));
+    createBox(0.55, 1.9, 0.55, 0.8, 0.95, 3.88, new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.2 })); // Styler unit
 
-    // 3. 3-Way Split Hotel Bathroom (X: +1.8 to +4.4)
-    createBox(0.08, 2.4, 1.4, 2.1, 1.2, 1.1, matSoundproofWall);
-    createBox(1.2, 2.4, 0.08, 3.2, 1.2, 1.8, matSoundproofWall);
-    createBox(1.2, 0.85, 0.55, 3.2, 0.425, 0.75, new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.2 }));
-    createBox(1.1, 0.8, 0.04, 3.2, 1.45, 0.5, new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.1, metalness: 0.8 }));
-    createBox(0.4, 0.42, 0.6, 2.7, 0.21, 2.4, new THREE.MeshStandardMaterial({ color: 0xffffff }));
-    createBox(1.1, 2.0, 0.04, 3.8, 1.0, 1.8, matGlass, false, false);
-    createBox(0.7, 1.9, 0.75, 4.05, 0.95, 2.75, new THREE.MeshStandardMaterial({ color: 0x1e1e2e, roughness: 0.3 }));
+    // ★ D5 Acoustic Door Partition between Studio & Bathroom
+    createBox(0.12, 2.4, 0.8, 1.9, 1.2, 1.65, matSoundproofWall); // North stud wall
+    createBox(0.12, 0.3, 1.0, 1.9, 2.25, 2.55, matSoundproofWall); // D5 Door header wall
+    createBox(0.14, 2.1, 0.06, 1.9, 1.05, 2.05, matDoorFrame); // North jamb
+    createBox(0.14, 2.1, 0.06, 1.9, 1.05, 3.05, matDoorFrame); // South jamb
+    const door5 = createBox(0.04, 2.05, 0.85, 1.7, 1.05, 2.35, matDoorFrame); // Ajar acoustic door
+    door5.rotation.y = -0.65; // Ajar open angle for walkthrough
+    createBox(0.08, 0.04, 0.12, 1.62, 1.0, 2.7, matChrome); // Door 5 chrome handle
+    createBox(0.12, 2.4, 1.2, 1.9, 1.2, 3.65, matSoundproofWall); // South stud wall
 
-    // 7. Teleport Functionality
+    // 3. 3-Way Split Hotel Bathroom (X: +1.9 to +4.5)
+    // ★ Powder/Vanity Counter flush against North Wall (X: 3.20 to 3.85, Z: 1.25 to 1.80)
+    createBox(0.65, 0.85, 0.55, 3.525, 0.425, 1.525, new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.2 }));
+    createBox(0.60, 0.80, 0.03, 3.525, 1.45, 1.265, new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.1, metalness: 0.8 })); // Mirror mounted on North Wall
+    // ★ Laundry & Dryer Tower flush against North Wall (X: 3.85 to 4.50, Z: 1.25 to 1.90)
+    createBox(0.65, 1.95, 0.65, 4.175, 0.975, 1.575, new THREE.MeshStandardMaterial({ color: 0x1e1e2e, roughness: 0.3 })); // Laundry Tower
+    
+    // ★ Independent Toilet Room Partition & D7-A Pocket Door
+    createBox(0.2, 2.4, 0.1, 2.0, 1.2, 2.8, matSoundproofWall); // Toilet west stub wall
+    createBox(0.9, 0.3, 0.1, 2.55, 2.25, 2.8, matSoundproofWall); // D7-A Header wall
+    createBox(0.3, 2.1, 0.04, 2.2, 1.05, 2.8, matDoorOak); // D7-A Open pocket door
+    createBox(0.1, 2.4, 1.45, 3.1, 1.2, 3.525, matSoundproofWall); // Dividing wall between Toilet & Shower
+    createBox(0.4, 0.42, 0.6, 2.6, 0.21, 3.6, new THREE.MeshStandardMaterial({ color: 0xffffff })); // Toilet bowl
+
+    // ★ Independent Shower Room with D7-B Glass Door
+    createBox(0.3, 2.4, 0.1, 4.35, 1.2, 2.8, matWall); // Shower east stub wall
+    createBox(1.1, 0.3, 0.1, 3.65, 2.25, 2.8, matWall); // Shower header wall
+    createBox(0.85, 2.0, 0.025, 3.65, 1.0, 2.8, matGlassDoor); // D7-B 10T Tempered Glass Door
+    createBox(0.04, 0.35, 0.08, 3.3, 1.05, 2.8, matChrome); // D7-B Chrome bar handle
+
+    // 7. Teleport Functionality (Accurate 1:1 Blueprint Positions)
     const ROOM_TELEPORTS = {
-      living: { x: 2.0, y: 1.6, z: -1.8, title: "LDK 거실 & 1,800mm 대면식 아일랜드", desc: "2인 대면식 아일랜드 식탁과 패브릭 소파, 75인치 TV가 배치된 공용 생활 공간입니다." },
-      entry: { x: -3.4, y: 1.6, z: -1.8, title: "현관 & 클린 전실 (벽걸이 자전거)", desc: "정비대는 외부로 이전하고 수납장과 벽걸이 로드바이크로 정리된 깔끔한 현관입니다." },
-      breezeway: { x: 2.8, y: 1.6, z: 0.0, title: "단열 연결통로 (150mm 우레탄벽 + W7 창)", desc: "유리 온실을 없애고 150mm 우레탄 단열패널과 W7 틸트 환기창으로 결로를 차단한 통로입니다." },
-      bedroom: { x: -2.8, y: 1.6, z: 1.8, title: "마스터 침실 (퀸베드 하부 4구 서랍)", desc: "1,500×2,000mm 퀸 침대 하부 400L 서랍 수납과 작업실 차음벽으로 안락한 침실입니다." },
-      studio: { x: -0.4, y: 1.6, z: 2.0, title: "독립 개발 작업실 & 서브 드레스룸", desc: "1,500mm 코딩 데스크(듀얼 모니터)와 에어드레서/시스템 행거가 완비된 개발 공간입니다." },
-      bathroom: { x: 3.2, y: 1.6, z: 1.0, title: "3분리 독립 호텔식 욕실 & 파우더룸", desc: "독립 양변기, 독립 샤워실, 1,200mm 복도식 더블 파우더 카운터로 동시 출근이 가능합니다." }
+      living: { x: 2.4, y: 1.6, z: -2.75, title: "LDK 거실 & 1,800mm 대면식 아일랜드", desc: "2인 대면식 아일랜드 식탁과 2,200mm 패브릭 소파, 65인치 TV가 완비된 4.2m 오픈 거실입니다." },
+      entry: { x: -3.6, y: 1.6, z: -2.75, title: "현관 & 클린 전실 (벽걸이 자전거)", desc: "2인 대형 신발장과 인피자 자전거 수직 리프트 거치대로 정돈된 1.8m 현관 클린존입니다." },
+      breezeway: { x: 3.4, y: 1.6, z: 0.0, title: "고단열 연결 복도 (폭 2.2m x 길이 2.5m)", desc: "150mm 우레탄 단열패널과 W7 개폐식 창호로 중정을 조망하는 2.5m 연결 통로입니다." },
+      bedroom: { x: -2.9, y: 1.6, z: 2.75, title: "마스터 침실 (퀸베드 1,500x2,000mm 하부 4서랍)", desc: "퀸 침대 하부 4서랍장과 2,200mm 붙박이장, W4 중정 조망창을 갖춘 3.2m 독립 침실입니다." },
+      studio: { x: 0.3, y: 1.6, z: 2.75, title: "스마트 워크룸 & 서브 드레스룸 (1,500mm 코딩 데스크)", desc: "1,500mm 코딩 데스크(듀얼 모니터)와 스타일러 시스템장이 완비된 3.2m 독립 개발 공간입니다." },
+      bathroom: { x: 2.75, y: 1.6, z: 2.0, title: "호텔식 3분리 건식 욕실 & 파우더룸", desc: "1,200mm 와이드 파우더 세면대, 세탁타워, 독립 양변기실 및 독립 샤워실로 동시 출근이 가능합니다." }
     };
 
     window.teleportTo = function(key) {
@@ -435,36 +528,58 @@
 
       const originX = 110;
       const originY = 80;
-      const scale = 17;
+      const scale = 15.5; // Scale: 9.0m x 8.5m fits cleanly into 220x160
 
       function toMapX(worldX) { return originX + worldX * scale; }
       function toMapY(worldZ) { return originY + worldZ * scale; }
 
-      // Container Outlines
+      // Wing A Container Outline (9.0m x 3.0m)
       minimapCtx.strokeStyle = '#38bdf8';
       minimapCtx.lineWidth = 1.5;
-      minimapCtx.strokeRect(toMapX(-4.4), toMapY(-3.15), 8.8 * scale, 2.7 * scale);
+      minimapCtx.strokeRect(toMapX(-4.5), toMapY(-4.25), 9.0 * scale, 3.0 * scale);
       minimapCtx.fillStyle = 'rgba(56, 189, 248, 0.08)';
-      minimapCtx.fillRect(toMapX(-4.4), toMapY(-3.15), 8.8 * scale, 2.7 * scale);
+      minimapCtx.fillRect(toMapX(-4.5), toMapY(-4.25), 9.0 * scale, 3.0 * scale);
 
+      // Wing B Container Outline (9.0m x 3.0m)
       minimapCtx.strokeStyle = '#818cf8';
-      minimapCtx.strokeRect(toMapX(-4.4), toMapY(0.45), 8.8 * scale, 2.7 * scale);
+      minimapCtx.strokeRect(toMapX(-4.5), toMapY(1.25), 9.0 * scale, 3.0 * scale);
       minimapCtx.fillStyle = 'rgba(129, 140, 248, 0.08)';
-      minimapCtx.fillRect(toMapX(-4.4), toMapY(0.45), 8.8 * scale, 2.7 * scale);
+      minimapCtx.fillRect(toMapX(-4.5), toMapY(1.25), 9.0 * scale, 3.0 * scale);
 
-      // Breezeway
+      // Courtyard Deck (6.8m x 2.5m)
+      minimapCtx.strokeStyle = 'rgba(180, 83, 9, 0.5)';
+      minimapCtx.strokeRect(toMapX(-4.5), toMapY(-1.25), 6.8 * scale, 2.5 * scale);
+      minimapCtx.fillStyle = 'rgba(180, 83, 9, 0.08)';
+      minimapCtx.fillRect(toMapX(-4.5), toMapY(-1.25), 6.8 * scale, 2.5 * scale);
+
+      // Insulated Breezeway (2.2m x 2.5m)
       minimapCtx.strokeStyle = '#34d399';
-      minimapCtx.strokeRect(toMapX(2.0), toMapY(-0.45), 1.6 * scale, 0.9 * scale);
+      minimapCtx.strokeRect(toMapX(2.3), toMapY(-1.25), 2.2 * scale, 2.5 * scale);
+      minimapCtx.fillStyle = 'rgba(52, 211, 153, 0.12)';
+      minimapCtx.fillRect(toMapX(2.3), toMapY(-1.25), 2.2 * scale, 2.5 * scale);
+
+      // Wing B Bathroom North Solid Wall & D7 Door on Minimap
+      minimapCtx.strokeStyle = '#64748b';
+      minimapCtx.lineWidth = 2.5;
+      minimapCtx.beginPath();
+      minimapCtx.moveTo(toMapX(3.18), toMapY(1.25));
+      minimapCtx.lineTo(toMapX(4.5), toMapY(1.25));
+      minimapCtx.stroke();
+      minimapCtx.strokeStyle = '#10b981';
+      minimapCtx.lineWidth = 1.8;
+      minimapCtx.strokeRect(toMapX(2.35), toMapY(1.23), 0.83 * scale, 0.04 * scale);
 
       // Room Labels
       minimapCtx.fillStyle = '#94a3b8';
       minimapCtx.font = '9px sans-serif';
-      minimapCtx.fillText("현관", toMapX(-3.8), toMapY(-1.7));
-      minimapCtx.fillText("주방/식탁", toMapX(-1.5), toMapY(-1.7));
-      minimapCtx.fillText("LDK 거실", toMapX(1.8), toMapY(-1.7));
-      minimapCtx.fillText("침실", toMapX(-3.3), toMapY(1.9));
-      minimapCtx.fillText("개발실", toMapX(-0.5), toMapY(1.9));
-      minimapCtx.fillText("3분리욕실", toMapX(2.4), toMapY(1.9));
+      minimapCtx.fillText("현관", toMapX(-3.9), toMapY(-2.6));
+      minimapCtx.fillText("주방/식탁", toMapX(-1.6), toMapY(-2.6));
+      minimapCtx.fillText("LDK 거실", toMapX(2.0), toMapY(-2.6));
+      minimapCtx.fillText("중정 데크", toMapX(-1.5), toMapY(0.1));
+      minimapCtx.fillText("복도", toMapX(3.1), toMapY(0.1));
+      minimapCtx.fillText("침실", toMapX(-3.3), toMapY(2.9));
+      minimapCtx.fillText("개발실", toMapX(0.0), toMapY(2.9));
+      minimapCtx.fillText("3분리욕실", toMapX(2.8), toMapY(2.9));
 
       // Player Vision Cone & Marker
       const px = toMapX(camera.position.x);
@@ -490,34 +605,114 @@
       minimapCtx.stroke();
     }
 
+    // 8-B. 실시간 AABB 내부 벽체 & 가구 물리 충돌 엔진 (벽 통과 차단 & 문으로만 통행)
+    const INTERIOR_WALL_COLLIDERS = [
+      // D2 Vestibule Partition Walls (D2 Doorway at Z: -3.30 ~ -2.20 is OPEN)
+      { minX: -2.78, maxX: -2.62, minZ: -4.25, maxZ: -3.30, name: "중문 북측벽" },
+      { minX: -2.78, maxX: -2.62, minZ: -2.20, maxZ: -1.25, name: "중문 남측벽" },
+
+      // Wing B Bedroom-Studio Double Stud Wall (D6 Doorway at Z: 2.05 ~ 3.05 is OPEN)
+      { minX: -1.38, maxX: -1.22, minZ: 1.25, maxZ: 2.05, name: "침실 북측 차음벽" },
+      { minX: -1.38, maxX: -1.22, minZ: 3.05, maxZ: 4.25, name: "침실 남측 차음벽" },
+
+      // Wing B Studio-Bathroom Acoustic Wall (D5 Doorway at Z: 2.05 ~ 3.05 is OPEN)
+      { minX: 1.82, maxX: 1.98, minZ: 1.25, maxZ: 2.05, name: "작업실 북측 차음벽" },
+      { minX: 1.82, maxX: 1.98, minZ: 3.05, maxZ: 4.25, name: "작업실 남측 차음벽" },
+
+      // Wing B Bathroom Dividing Wall between Toilet and Shower
+      { minX: 3.04, maxX: 3.16, minZ: 2.80, maxZ: 4.25, name: "양변기-샤워실 중앙 분리벽" },
+      { minX: 1.90, maxX: 2.15, minZ: 2.74, maxZ: 2.86, name: "양변기실 서측 벽" },
+      { minX: 4.10, maxX: 4.45, minZ: 2.74, maxZ: 2.86, name: "샤워실 동측 벽" },
+
+      // ★ Wing B Bathroom North Solid Wall & Door Jambs (X: 3.14 ~ 4.55, Z: 1.08 ~ 1.28) - 복도에서 욕실 벽 관통 원천 차단!
+      { minX: 3.14, maxX: 4.55, minZ: 1.08, maxZ: 1.28, name: "동 B 욕실 북측 외벽" },
+
+      // ★ 욕실 파우더 세면대 & 세탁타워 가구 충돌체
+      { minX: 3.18, maxX: 3.85, minZ: 1.25, maxZ: 1.82, name: "파우더 세면대 카운터" },
+      { minX: 3.85, maxX: 4.55, minZ: 1.25, maxZ: 1.95, name: "세탁/건조기 타워" },
+
+      // Major Furniture Obstacles (Solid Anti-Clipping)
+      { minX: -2.15, maxX: -0.25, minZ: -2.95, maxZ: -2.05, name: "1800mm 대면 아일랜드" },
+      { minX: -0.50, maxX: 1.10, minZ: 1.30, maxZ: 2.10, name: "1500mm 코딩 데스크" },
+      { minX: -3.70, maxX: -2.10, minZ: 1.70, maxZ: 3.80, name: "1500x2000mm 퀸 침대" }
+    ];
+
+    function resolveInteriorCollisions(oldX, oldZ) {
+      const r = 0.22; // Player shoulder collision radius
+      const currentX = camera.position.x;
+      const currentZ = camera.position.z;
+
+      // 1. Try sliding along X only (test new X with old Z)
+      let canMoveX = true;
+      for (const box of INTERIOR_WALL_COLLIDERS) {
+        if (currentX + r > box.minX && currentX - r < box.maxX &&
+            oldZ + r > box.minZ && oldZ - r < box.maxZ) {
+          canMoveX = false;
+          break;
+        }
+      }
+
+      // 2. Try sliding along Z only (test new Z with old X)
+      let canMoveZ = true;
+      for (const box of INTERIOR_WALL_COLLIDERS) {
+        if (oldX + r > box.minX && oldX - r < box.maxX &&
+            currentZ + r > box.minZ && currentZ - r < box.maxZ) {
+          canMoveZ = false;
+          break;
+        }
+      }
+
+      if (!canMoveX && !canMoveZ) {
+        // Blocked on both axes (corner or direct wall impact): revert to old position
+        camera.position.x = oldX;
+        camera.position.z = oldZ;
+      } else if (!canMoveX) {
+        // Blocked along X: slide along Z
+        camera.position.x = oldX;
+      } else if (!canMoveZ) {
+        // Blocked along Z: slide along X
+        camera.position.z = oldZ;
+      } else {
+        // Both single-axis checks passed, but check diagonal penetration
+        for (const box of INTERIOR_WALL_COLLIDERS) {
+          if (currentX + r > box.minX && currentX - r < box.maxX &&
+              currentZ + r > box.minZ && currentZ - r < box.maxZ) {
+            camera.position.x = oldX;
+            camera.position.z = oldZ;
+            break;
+          }
+        }
+      }
+    }
+
     // 9. Location Detection for HUD
     function updateCurrentRoomHUD() {
       const x = camera.position.x;
       const z = camera.position.z;
 
-      if (z < -0.45) { // Wing A
-        if (x < -2.5) {
+      if (z < -1.25) { // Wing A (공용동)
+        if (x < -2.7) {
           currentRoomTitle.innerText = ROOM_TELEPORTS.entry.title;
           currentRoomDesc.innerText = ROOM_TELEPORTS.entry.desc;
-        } else if (x < 0.8) {
+        } else if (x < 0.3) {
           currentRoomTitle.innerText = "주방 & 1,800mm 대면식 아일랜드 식탁";
-          currentRoomDesc.innerText = "2인이 마주보고 식사하는 1,800mm 아일랜드와 인덕션 카운터입니다.";
+          currentRoomDesc.innerText = "2인이 마주보고 식사하는 1,800mm 아일랜드와 인덕션/냉장고 카운터입니다.";
         } else {
           currentRoomTitle.innerText = ROOM_TELEPORTS.living.title;
           currentRoomDesc.innerText = ROOM_TELEPORTS.living.desc;
         }
-      } else if (z > 0.45) { // Wing B
-        if (x < -1.4) {
+      } else if (z > 1.25) { // Wing B (프라이빗동)
+        if (x < -1.3) {
           currentRoomTitle.innerText = ROOM_TELEPORTS.bedroom.title;
           currentRoomDesc.innerText = ROOM_TELEPORTS.bedroom.desc;
-        } else if (x < 1.8) {
+        } else if (x < 1.9) {
           currentRoomTitle.innerText = ROOM_TELEPORTS.studio.title;
           currentRoomDesc.innerText = ROOM_TELEPORTS.studio.desc;
         } else {
           currentRoomTitle.innerText = ROOM_TELEPORTS.bathroom.title;
           currentRoomDesc.innerText = ROOM_TELEPORTS.bathroom.desc;
         }
-      } else { // Breezeway
+      } else { // Insulated Breezeway (-1.25 <= z <= 1.25)
         currentRoomTitle.innerText = ROOM_TELEPORTS.breezeway.title;
         currentRoomDesc.innerText = ROOM_TELEPORTS.breezeway.desc;
       }
@@ -542,23 +737,50 @@
         if (moveForward || moveBackward) velocity.z -= direction.z * speed * delta;
         if (moveLeft || moveRight) velocity.x -= direction.x * speed * delta;
 
+        // Backup position before movement for wall collision resolution
+        const oldX = camera.position.x;
+        const oldZ = camera.position.z;
+
         controls.moveRight(-velocity.x * delta);
         controls.moveForward(-velocity.z * delta);
 
         // Keep Eye-Level strictly fixed at 1.6m
         camera.position.y = 1.6;
 
-        // Container Boundary Clamping
-        if (camera.position.z <= -0.45) {
-          camera.position.x = Math.max(-4.2, Math.min(4.2, camera.position.x));
-          camera.position.z = Math.max(-3.0, Math.min(-0.6, camera.position.z));
-        } else if (camera.position.z >= 0.45) {
-          camera.position.x = Math.max(-4.2, Math.min(4.2, camera.position.x));
-          camera.position.z = Math.max(0.6, Math.min(3.0, camera.position.z));
+        // Architectural Boundary Clamping based on starting zone (oldZ)
+        const isBreezewayX = (camera.position.x >= 2.35 && camera.position.x <= 4.45);
+        const isWingBDoorwayX = (camera.position.x >= 2.35 && camera.position.x <= 3.14);
+
+        if (oldZ < -1.25) {
+          // --- [Wing A: 공용 생활동 (Z: -4.25 ~ -1.25)] ---
+          camera.position.x = Math.max(-4.35, Math.min(4.35, camera.position.x));
+          camera.position.z = Math.max(-4.15, camera.position.z);
+          if (!isBreezewayX) {
+            // 통로 외 구간: 남측 외벽에 막힘
+            camera.position.z = Math.min(-1.40, camera.position.z);
+          }
+        } else if (oldZ > 1.25) {
+          // --- [Wing B: 프라이빗 침실·작업·욕실동 (Z: +1.25 ~ +4.25)] ---
+          camera.position.x = Math.max(-4.35, Math.min(4.35, camera.position.x));
+          camera.position.z = Math.min(4.15, camera.position.z);
+          if (!isWingBDoorwayX) {
+            // D7 도어웨이 외 구간 (침실/작업실 북측벽 및 욕실 북측 외벽 X > 3.14): 북측 벽에 막힘
+            camera.position.z = Math.max(1.40, camera.position.z);
+          }
         } else {
-          camera.position.x = Math.max(2.1, Math.min(3.5, camera.position.x));
-          camera.position.z = Math.max(-0.6, Math.min(0.6, camera.position.z));
+          // --- [Breezeway: 고단열 연결 통로 (-1.25 <= oldZ <= 1.25, 폭 2.2m: X 2.3~4.5)] ---
+          camera.position.x = Math.max(2.40, Math.min(4.40, camera.position.x));
+          camera.position.z = Math.max(-4.15, camera.position.z);
+          if (!isWingBDoorwayX) {
+            // D7 도어웨이 외 구간(X > 3.14)에서는 B동 욕실 북측 외벽에 막혀 남쪽 진입 차단
+            camera.position.z = Math.min(1.05, camera.position.z);
+          } else {
+            camera.position.z = Math.min(4.15, camera.position.z);
+          }
         }
+
+        // Apply Interior Solid Wall & Furniture Collision Resolution (Wall Sliding)
+        resolveInteriorCollisions(oldX, oldZ);
 
         updateCurrentRoomHUD();
       }

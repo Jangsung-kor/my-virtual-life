@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>므브테이너 16.4평 확정 상세 설계도 및 창호/도어 배치 (정밀 치수 검증)</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    :root {
+      --background: #091221;
+      --card: #0d1829;
+      --border: #1e3250;
+      --foreground: #f1f5f9;
+      --muted-foreground: #94a3b8;
+      --primary: #38bdf8;
+    }
+    .dim-line {
+      stroke: #64748b;
+      stroke-width: 1;
+      stroke-dasharray: 2 2;
+    }
+    .dim-solid {
+      stroke: #94a3b8;
+      stroke-width: 1.2;
+    }
+  </style>
+</head>
+<body class="bg-[#070d19] text-slate-100 antialiased p-4 font-sans">
+  <div class="bg-[var(--card)] text-[var(--foreground)] border border-[var(--border)] rounded-xl p-6 shadow-sm max-w-5xl mx-auto">
+    
+    <!-- Top Header -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-4 mb-4 border-b border-[var(--border)] gap-3">
+      <div>
+        <div class="flex items-center gap-2">
+          <a href="index.html" class="text-xs px-2.5 py-1 rounded bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-700 transition">
+            &larr; 통합 허브
+          </a>
+          <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-800">정밀 1:1 축척 검증도</span>
+          <h2 class="text-white font-bold text-lg">므브테이너 16.4평 정축척 평면도 & 치수 명세</h2>
+        </div>
+        <p class="text-slate-400 text-xs mt-1">
+          실측 비례 3:1(폭 3,000mm × 길이 9,000mm) 정상화 | 퀸 침대(1,500×2,000)·1,800mm 데스크·창호/도어 전수 치수선 반영
+        </p>
+      </div>
+
+      <!-- View Switch -->
+      <div class="inline-flex rounded-lg border border-[var(--border)] p-1 bg-[#070d19] text-xs">
+        <button id="btnViewPlan" onclick="switchView('plan')" class="px-3 py-1.5 rounded font-medium transition-all bg-blue-600 text-white shadow-sm">
+          1인 기본 평면도
+        </button>
+        <button id="btnViewPlan2P" onclick="switchView('plan2p')" class="px-3 py-1.5 rounded font-medium transition-all text-slate-400 hover:text-white">
+          2인 최적화 평면도 (시나리오 1)
+        </button>
+        <button id="btnViewConcept" onclick="switchView('concept')" class="px-3 py-1.5 rounded font-medium transition-all text-slate-400 hover:text-white">
+          중정 데크 구조 원리
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Visual Canvas Area -->
+    <div class="bg-[var(--background)] border border-[var(--border)] rounded-xl p-4 flex flex-col items-center justify-center relative overflow-hidden">
+      
+      <!-- 1. Detailed Floor Plan with Accurate Dimensions (Scale: 1,000mm = 75px) -->
+      <div id="viewContainerPlan" class="w-full flex flex-col items-center">
+        <div class="w-full flex justify-between items-center text-xs text-slate-400 mb-3 px-2">
+          <span class="font-semibold text-white flex items-center gap-2">
+            <span>동 A(공용) + 동 B(프라이빗) 정축척 건축 평면도</span>
+            <span class="text-[11px] text-cyan-400 font-mono">[축척 1:13.3 / 1m = 75px]</span>
+          </span>
+          <div class="flex items-center gap-3 text-[11px] font-mono">
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 bg-emerald-500 rounded-sm inline-block"></span> 도어 (D1~D7)</span>
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 bg-sky-400 rounded-sm inline-block"></span> 시스템 창호 (W1~W6)</span>
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 bg-amber-600 rounded-sm inline-block"></span> 방킬라이 중정</span>
+          </div>
+        </div>
+
+        <!-- SVG 뷰박스: 960 x 780 (외곽 치수선 및 마진 완전 확보) -->
+        <svg viewBox="0 0 960 780" class="w-full h-auto select-none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <!-- 방킬라이 데크 우드 패턴 -->
+            <pattern id="bangkiraiPattern" width="12" height="12" patternUnits="userSpaceOnUse">
+              <rect width="12" height="12" fill="#451a03" fill-opacity="0.3"/>
+              <line x1="0" y1="0" x2="0" y2="12" stroke="#92400e" stroke-width="1.2" opacity="0.6"/>
+              <line x1="6" y1="0" x2="6" y2="12" stroke="#78350f" stroke-width="0.8" opacity="0.4"/>
+            </pattern>
+            <!-- 화살표 마커 (치수선 전용) -->
+            <marker id="arrowStart" viewBox="0 0 10 10" refX="0" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M 10 1 L 0 5 L 10 9 z" fill="#94a3b8"/>
+            </marker>
+            <marker id="arrowEnd" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M 0 1 L 10 5 L 0 9 z" fill="#94a3b8"/>
+            </marker>
+            <marker id="arrowCyanStart" viewBox="0 0 10 10" refX="0" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M 10 1 L 0 5 L 10 9 z" fill="#38bdf8"/>
+            </marker>
+            <marker id="arrowCyanEnd" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M 0 1 L 10 5 L 0 9 z" fill="#38bdf8"/>
+            </marker>
+          </defs>
+
+          <!-- 기준 원점: (X0 = 140, Y0 = 90) -->
+          <!-- 동 A: X 140 ~ 815 (폭 675 = 9,000mm), Y 90 ~ 315 (높이 225 = 3,000mm) -> 정확한 3:1 비율! -->
+          <!-- 중정: Y 315 ~ 503 (간격 188 = 2,500mm) -->
+          <!-- 동 B: X 140 ~ 815 (폭 675 = 9,000mm), Y 503 ~ 728 (높이 225 = 3,000mm) -> 정확한 3:1 비율! -->
+
+          <!-- ================= [1] 최상단 외곽 치수선 (WING A 가로 치수선) ================= -->
+          <!-- 전체 9,000mm 치수선 (Y = 40) -->
+          <line x1="140" y1="40" x2="815" y2="40" class="dim-solid" marker-start="url(#arrowCyanStart)" marker-end="url(#arrowCyanEnd)"/>
+          <line x1="140" y1="30" x2="140" y2="90" class="dim-line"/>
+          <line x1="815" y1="30" x2="815" y2="90" class="dim-line"/>
+          <text x="477" y="34" text-anchor="middle" fill="#38bdf8" font-size="12" font-weight="bold" font-family="monospace">총 길이: 9,000 mm</text>
+
+          <!-- 동 A 실별 세부 가로 치수선 (Y = 65) -->
+          <!-- 1. 전실 1,800mm (폭 135px: 140 ~ 275) -->
+          <line x1="140" y1="65" x2="275" y2="65" class="dim-solid" marker-start="url(#arrowStart)" marker-end="url(#arrowEnd)"/>
+          <text x="207" y="60" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="monospace">1,800 mm</text>
+          
+          <!-- 2. 주방 3,000mm (폭 225px: 275 ~ 500) -->
+          <line x1="275" y1="65" x2="500" y2="65" class="dim-solid" marker-start="url(#arrowStart)" marker-end="url(#arrowEnd)"/>
+          <line x1="275" y1="55" x2="275" y2="90" class="dim-line"/>
+          <text x="387" y="60" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="monospace">3,000 mm</text>
+
+          <!-- 3. 거실 4,200mm (폭 315px: 500 ~ 815) -->
+          <line x1="500" y1="65" x2="815" y2="65" class="dim-solid" marker-start="url(#arrowStart)" marker-end="url(#arrowEnd)"/>
+          <line x1="500" y1="55" x2="500" y2="90" class="dim-line"/>
+          <text x="657" y="60" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="monospace">4,200 mm</text>
+
+          <!-- ================= [2] 좌측 수직 세로 치수선 ================= -->
+          <!-- 전체 폭 8,500mm 치수선 (X = 35) -->
+          <line x1="35" y1="90" x2="35" y2="728" class="dim-solid" marker-start="url(#arrowCyanStart)" marker-end="url(#arrowCyanEnd)"/>
+          <line x1="25" y1="90" x2="140" y2="90" class="dim-line"/>
+          <line x1="25" y1="728" x2="140" y2="728" class="dim-line"/>
+          <text x="25" y="415" text-anchor="middle" fill="#38bdf8" font-size="11" font-weight="bold" font-family="monospace" transform="rotate(-90 25 415)">전체 대지 점유 폭: 8,500 mm</text>
+
+          <!-- 세부 구간별 세로 치수선 (X = 75) -->
+          <!-- 동 A 세로폭 3,000mm (Y: 90 ~ 315) -->
+          <line x1="75" y1="90" x2="75" y2="315" class="dim-solid" marker-start="url(#arrowStart)" marker-end="url(#arrowEnd)"/>
+          <line x1="65" y1="315" x2="140" y2="315" class="dim-line"/>
+          <text x="65" y="205" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="monospace" transform="rotate(-90 65 205)">동A 폭 3,000 mm</text>
+
+          <!-- 중정 이격 거리 2,500mm (Y: 315 ~ 503) -->
+          <line x1="75" y1="315" x2="75" y2="503" class="dim-solid" marker-start="url(#arrowStart)" marker-end="url(#arrowEnd)"/>
+          <line x1="65" y1="503" x2="140" y2="503" class="dim-line"/>
+          <text x="65" y="410" text-anchor="middle" fill="#f59e0b" font-size="10" font-family="monospace" transform="rotate(-90 65 410)">중정 2,500 mm</text>
+
+          <!-- 동 B 세로폭 3,000mm (Y: 503 ~ 728) -->
+          <line x1="75" y1="503" x2="75" y2="728" class="dim-solid" marker-start="url(#arrowStart)" marker-end="url(#arrowEnd)"/>
+          <text x="65" y="618" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="monospace" transform="rotate(-90 65 618)">동B 폭 3,000 mm</text>
+
+
+          <!-- ================= [3] WING A (공용 생활동: 3,000 × 9,000mm) ================= -->
+          <!-- 컨테이너 외벽 프레임 (외경 675 × 225px) -->
+          <rect x="140" y="90" width="675" height="225" rx="4" fill="#0d1829" stroke="#1e3250" stroke-width="3"/>
+          <rect x="148" y="98" width="659" height="209" fill="#091221" stroke="#334155" stroke-width="1.2"/>
+          <text x="155" y="115" fill="#60a5fa" font-size="11" font-weight="bold">[동 A] 공용 생활동 (3,000 × 9,000mm / 8.17평)</text>
+
+          <!-- 북측 창호 W1: 주방 환기창 (1,200 × 600mm -> 폭 90px, x: 340 ~ 430) -->
+          <line x1="340" y1="90" x2="430" y2="90" stroke="#38bdf8" stroke-width="6"/>
+          <text x="385" y="82" text-anchor="middle" fill="#38bdf8" font-size="9" font-weight="bold">W1 (주방 1200×600)</text>
+
+          <!-- 서측 도어 D1: 주 출입 현관문 (폭 900mm -> 68px, y: 170 ~ 238) -->
+          <line x1="140" y1="170" x2="140" y2="238" stroke="#10b981" stroke-width="7"/>
+          <path d="M 140 170 A 68 68 0 0 1 208 238" fill="none" stroke="#10b981" stroke-width="1.5" stroke-dasharray="2 2"/>
+          <text x="125" y="205" text-anchor="middle" fill="#10b981" font-size="9" font-weight="bold" transform="rotate(-90 125 205)">D1 (현관문 900mm)</text>
+
+          <!-- 실 1. 현관 & 자전거 전실 (1,800 × 3,000mm -> 135 × 225px: X 140 ~ 275) -->
+          <rect x="148" y="98" width="127" height="209" fill="#1e293b" fill-opacity="0.3"/>
+          <!-- 신발장 & 수납 벤치 (400 × 1,200mm -> 30 × 90px) -->
+          <rect x="152" y="102" width="30" height="60" fill="#334155" stroke="#475569" stroke-width="1"/>
+          <text x="167" y="135" text-anchor="middle" fill="#94a3b8" font-size="7">신발장</text>
+          <!-- 인피자 이노사이클 18 자전거 벽걸이 거치대 (1,750 × 450mm -> 131 × 34px) -->
+          <rect x="152" y="255" width="115" height="34" rx="3" fill="#0f172a" stroke="#06b6d4" stroke-width="1.2"/>
+          <text x="210" y="272" text-anchor="middle" fill="#22d3ee" font-size="8" font-weight="bold">INFIZA GRAVEL BIKE</text>
+          <text x="210" y="283" text-anchor="middle" fill="#94a3b8" font-size="7">실내 벽걸이 정비존</text>
+          <text x="210" y="175" text-anchor="middle" fill="#f8fafc" font-size="11" font-weight="bold">현관 전실</text>
+          <text x="210" y="192" text-anchor="middle" fill="#94a3b8" font-size="9">1,800 × 3,000mm</text>
+
+          <!-- 내부 벽체 1 및 D2 3연동 중문 (폭 1,200mm -> 90px) -->
+          <line x1="275" y1="98" x2="275" y2="155" stroke="#475569" stroke-width="3"/>
+          <line x1="275" y1="155" x2="275" y2="245" stroke="#10b981" stroke-width="4" stroke-dasharray="4 2"/>
+          <line x1="275" y1="245" x2="275" y2="307" stroke="#475569" stroke-width="3"/>
+          <text x="288" y="202" fill="#10b981" font-size="8" font-weight="bold">D2 (3연동중문 1200)</text>
+
+          <!-- 실 2. 대형 ㄱ자 주방 & 바 (3,000 × 3,000mm -> 225 × 225px: X 275 ~ 500) -->
+          <rect x="278" y="98" width="222" height="209" fill="#78350f" fill-opacity="0.15"/>
+          <!-- 싱크대 상판 ㄱ자 (깊이 600mm -> 45px) -->
+          <path d="M 285 102 L 485 102 L 485 155 L 440 155 L 440 145 L 285 145 Z" fill="#334155" stroke="#64748b" stroke-width="1"/>
+          <!-- 인덕션 3구 -->
+          <rect x="300" y="108" width="45" height="30" fill="#1e293b" stroke="#e11d48" stroke-width="1"/>
+          <circle cx="312" cy="123" r="5" fill="#f43f5e" opacity="0.6"/>
+          <circle cx="332" cy="123" r="7" fill="#f43f5e" opacity="0.6"/>
+          <!-- 싱크볼 수전 -->
+          <rect x="365" y="108" width="55" height="28" rx="2" fill="#0f172a" stroke="#0ea5e9" stroke-width="1"/>
+          <!-- 냉장고장 (850 × 850mm -> 64 × 64px) -->
+          <rect x="430" y="102" width="60" height="60" fill="#1e293b" stroke="#94a3b8" stroke-width="1"/>
+          <text x="460" y="136" text-anchor="middle" fill="#cbd5e1" font-size="8">양문냉장고</text>
+          <!-- 아일랜드 다이닝 식탁 (1,400 × 700mm -> 105 × 52px) -->
+          <rect x="330" y="195" width="105" height="52" rx="3" fill="#451a03" stroke="#b45309" stroke-width="1.2"/>
+          <text x="382" y="222" text-anchor="middle" fill="#fef3c7" font-size="9" font-weight="bold">다이닝 아일랜드</text>
+          <text x="382" y="235" text-anchor="middle" fill="#d97706" font-size="7">1,400 × 700mm</text>
+          <!-- 식탁 의자 2개 -->
+          <rect x="350" y="252" width="25" height="15" rx="2" fill="#78350f"/>
+          <rect x="395" y="252" width="25" height="15" rx="2" fill="#78350f"/>
+          <text x="382" y="175" text-anchor="middle" fill="#f8fafc" font-size="11" font-weight="bold">주방 & 다이닝</text>
+          <text x="382" y="188" text-anchor="middle" fill="#94a3b8" font-size="9">3,000 × 3,000mm</text>
+
+          <!-- 실 3. 오픈 거실 & 라운지 (4,200 × 3,000mm -> 315 × 225px: X 500 ~ 815) -->
+          <rect x="500" y="98" width="307" height="209" fill="#064e3b" fill-opacity="0.15"/>
+          <!-- 3인용 소파 (2,100 × 850mm -> 158 × 64px) -->
+          <rect x="550" y="105" width="158" height="55" rx="4" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+          <text x="629" y="135" text-anchor="middle" fill="#e2e8f0" font-size="9">3인용 패브릭 소파 (2,100mm)</text>
+          <!-- 티테이블 (1,000 × 500mm -> 75 × 38px) -->
+          <rect x="590" y="170" width="78" height="35" rx="3" fill="#334155" stroke="#475569" stroke-width="1"/>
+          <!-- 65인치 TV 아트월 수납장 (1,600 × 350mm -> 120 × 26px) 동측 벽체 -->
+          <rect x="780" y="125" width="25" height="120" fill="#0f172a" stroke="#475569" stroke-width="1"/>
+          <text x="792" y="188" text-anchor="middle" fill="#94a3b8" font-size="8" transform="rotate(90 792 188)">65" TV 아트월</text>
+          <text x="635" y="225" text-anchor="middle" fill="#f8fafc" font-size="11" font-weight="bold">오픈 거실 & 라운지</text>
+          <text x="635" y="240" text-anchor="middle" fill="#94a3b8" font-size="9">4,200 × 3,000mm</text>
+
+          <!-- 거실 남측 통창 겸 중정 출입문 W2 / D3: 3m 파노라마 슬라이딩 (폭 3,000mm -> 225px: X 530 ~ 755) -->
+          <line x1="530" y1="315" x2="755" y2="315" stroke="#38bdf8" stroke-width="7"/>
+          <line x1="600" y1="315" x2="680" y2="315" stroke="#10b981" stroke-width="7"/>
+          <text x="642" y="307" text-anchor="middle" fill="#38bdf8" font-size="9" font-weight="bold">W2 / D3 (거실 3m 파노라마 통창 겸 중정 출입 파티오 도어)</text>
+
+
+          <!-- ================= [4] 중정 우드 데크 및 3중 유리 연결 브릿지 ================= -->
+          <!-- 중정 우드 데크 (방킬라이 천연목): 폭 2,500mm (높이 188px), 길이 5,100mm (X 140 ~ 650) -->
+          <rect x="140" y="315" width="510" height="188" fill="url(#bangkiraiPattern)" stroke="#b45309" stroke-width="2"/>
+          <text x="390" y="390" text-anchor="middle" fill="#fef3c7" font-size="13" font-weight="bold">프라이빗 방킬라이 우드 중정 (Courtyard)</text>
+          <text x="390" y="410" text-anchor="middle" fill="#fbbf24" font-size="10" font-family="monospace">실측 규격: 폭 2,500 mm × 길이 6,800 mm (약 5.1평)</text>
+          <text x="390" y="428" text-anchor="middle" fill="#94a3b8" font-size="9">양측 컨테이너 벽체로 외부 시선 100% 완전 차단 | 잠옷 착용 야외 휴식</text>
+
+          <!-- 중정 위 야외 원목 티테이블 (1,200 × 700mm -> 90 × 52px) 및 벤치 -->
+          <rect x="335" y="440" width="90" height="45" rx="3" fill="#78350f" stroke="#d97706" stroke-width="1.2"/>
+          <text x="380" y="466" text-anchor="middle" fill="#fed7aa" font-size="8" font-weight="bold">티테이블</text>
+          <!-- 의자 -->
+          <rect x="305" y="445" width="22" height="35" rx="2" fill="#451a03"/>
+          <rect x="432" y="445" width="22" height="35" rx="2" fill="#451a03"/>
+
+          <!-- 고단열 연결 복도 (Insulated Breezeway): 폭 2,200mm (165px: X 650 ~ 815), 길이 2,500mm (높이 188px) -->
+          <rect x="650" y="315" width="165" height="188" fill="#1e293b" stroke="#475569" stroke-width="2"/>
+          <!-- 복도 서측 벽: 150mm 고단열 패널 + W7 개폐식 시스템 환기창 (폭 1,200mm -> 90px / 도어 D4 완전 삭제) -->
+          <line x1="650" y1="315" x2="650" y2="365" stroke="#64748b" stroke-width="6"/>
+          <line x1="650" y1="365" x2="650" y2="455" stroke="#38bdf8" stroke-width="7"/>
+          <line x1="650" y1="455" x2="650" y2="503" stroke="#64748b" stroke-width="6"/>
+          <text x="635" y="415" text-anchor="middle" fill="#38bdf8" font-size="8" font-weight="bold" transform="rotate(-90 635 415)">W7 개폐식 창호 (1200×800)</text>
+
+          <!-- 동측 외벽: 150mm 완전 차폐벽 (창호 없음, 방범 극대화) -->
+          <line x1="815" y1="315" x2="815" y2="503" stroke="#0ea5e9" stroke-width="8"/>
+
+          <text x="732" y="405" text-anchor="middle" fill="#f8fafc" font-size="11" font-weight="bold">고단열 연결 복도</text>
+          <text x="732" y="420" text-anchor="middle" fill="#34d399" font-size="9" font-weight="bold">도어 배제 (현관문 1개 단일화)</text>
+          <text x="732" y="435" text-anchor="middle" fill="#94a3b8" font-size="8" font-family="monospace">2,200 × 2,500 mm</text>
+          <text x="732" y="435" text-anchor="middle" fill="#94a3b8" font-size="8" font-family="monospace">2,200 × 2,500 mm</text>
+
+
+          <!-- ================= [5] WING B (프라이빗 침실·작업·욕실동: 3,000 × 9,000mm) ================= -->
+          <!-- 컨테이너 외벽 프레임 (외경 675 × 225px) -->
+          <rect x="140" y="503" width="675" height="225" rx="4" fill="#0d1829" stroke="#1e3250" stroke-width="3"/>
+          <rect x="148" y="511" width="659" height="209" fill="#091221" stroke="#334155" stroke-width="1.2"/>
+          <text x="155" y="528" fill="#c084fc" font-size="11" font-weight="bold">[동 B] 프라이빗 침실·작업동 (3,000 × 9,000mm / 8.17평)</text>
+
+          <!-- 북측 창호 W4: 침실 중정 조망창 (1,800 × 1,800mm -> 폭 135px: X 190 ~ 325) -->
+          <line x1="190" y1="503" x2="325" y2="503" stroke="#38bdf8" stroke-width="6"/>
+          <text x="257" y="496" text-anchor="middle" fill="#38bdf8" font-size="9" font-weight="bold">W4 (침실 중정 조망창 1800×1800)</text>
+
+          <!-- 실 1. 독립 마스터 침실 (3,200 × 3,000mm -> 240 × 225px: X 140 ~ 380) -->
+          <rect x="148" y="511" width="232" height="209" fill="#064e3b" fill-opacity="0.2"/>
+          
+          <!-- ★ 퀸 침대 (실측 1,500 × 2,000mm -> 정확한 축척 112px × 150px!) -->
+          <rect x="160" y="545" width="112" height="150" rx="5" fill="#1e3a5f" stroke="#38bdf8" stroke-width="1.5"/>
+          <!-- 베개 2개 -->
+          <rect x="170" y="552" width="40" height="25" rx="3" fill="#334155" stroke="#64748b" stroke-width="1"/>
+          <rect x="222" y="552" width="40" height="25" rx="3" fill="#334155" stroke="#64748b" stroke-width="1"/>
+          <!-- 침대 매트리스 이불 라인 -->
+          <line x1="160" y1="590" x2="272" y2="590" stroke="#0284c7" stroke-width="1.5"/>
+          <text x="216" y="630" text-anchor="middle" fill="#ffffff" font-size="10" font-weight="bold">퀸 침대 (Queen)</text>
+          <text x="216" y="645" text-anchor="middle" fill="#38bdf8" font-size="9" font-family="monospace">1,500 × 2,000 mm</text>
+
+          <!-- 협탁 (400 × 400mm -> 30 × 30px) -->
+          <rect x="277" y="545" width="30" height="30" rx="2" fill="#334155" stroke="#475569" stroke-width="1"/>
+          <text x="292" y="563" text-anchor="middle" fill="#94a3b8" font-size="7">협탁</text>
+
+          <!-- 4도어 붙박이장 (2,200 × 600mm -> 165 × 45px) 남측 벽체 -->
+          <rect x="160" y="670" width="165" height="42" fill="#1e293b" stroke="#475569" stroke-width="1"/>
+          <line x1="201" y1="670" x2="201" y2="712" stroke="#334155"/>
+          <line x1="242" y1="670" x2="242" y2="712" stroke="#334155"/>
+          <line x1="283" y1="670" x2="283" y2="712" stroke="#334155"/>
+          <text x="242" y="695" text-anchor="middle" fill="#cbd5e1" font-size="8">4도어 붙박이장 (폭 2,200mm)</text>
+
+          <text x="325" y="605" text-anchor="middle" fill="#f8fafc" font-size="11" font-weight="bold">마스터 침실</text>
+          <text x="325" y="620" text-anchor="middle" fill="#94a3b8" font-size="9">3,200 × 3,000mm</text>
+
+          <!-- 침실-작업실 차음벽 및 D6 포켓 슬라이딩 도어 (폭 900mm -> 68px) -->
+          <line x1="380" y1="511" x2="380" y2="585" stroke="#475569" stroke-width="3"/>
+          <line x1="380" y1="585" x2="380" y2="653" stroke="#10b981" stroke-width="4" stroke-dasharray="3 3"/>
+          <line x1="380" y1="653" x2="380" y2="720" stroke="#475569" stroke-width="3"/>
+          <text x="392" y="622" fill="#10b981" font-size="8" font-weight="bold">D6(포켓도어 900)</text>
+
+          <!-- 실 2. 독립 개발 작업실 (Tech Studio: 3,200 × 3,000mm -> 240 × 225px: X 380 ~ 620) -->
+          <rect x="383" y="511" width="237" height="209" fill="#4c1d95" fill-opacity="0.25"/>
+          <!-- 1,800mm 원목 책상 (1,800 × 800mm -> 정확한 축척 135px × 60px!) -->
+          <rect x="420" y="530" width="135" height="60" rx="3" fill="#1e1b4b" stroke="#8b5cf6" stroke-width="1.5"/>
+          <!-- 듀얼 모니터 암 및 모니터 2대 -->
+          <rect x="435" y="534" width="45" height="10" rx="1" fill="#0f172a" stroke="#38bdf8" stroke-width="1"/>
+          <rect x="488" y="534" width="45" height="10" rx="1" fill="#0f172a" stroke="#38bdf8" stroke-width="1"/>
+          <!-- 데스크 체어 -->
+          <circle cx="487" cy="610" r="16" fill="#312e81" stroke="#6366f1" stroke-width="1.2"/>
+          <text x="487" y="565" text-anchor="middle" fill="#e0e7ff" font-size="9" font-weight="bold">1,800mm 코딩 데스크</text>
+          <text x="487" y="577" text-anchor="middle" fill="#a5b4fc" font-size="8" font-family="monospace">1,800 × 800 mm</text>
+
+          <!-- 서브 장비 랙 / 서버 및 유튜브 녹음 장비 선반 (1,200 × 400mm -> 90 × 30px) -->
+          <rect x="420" y="675" width="90" height="32" rx="2" fill="#1e1b4b" stroke="#6366f1" stroke-width="1"/>
+          <text x="465" y="695" text-anchor="middle" fill="#c7d2fe" font-size="8">서버랙 & 오디오 인터페이스</text>
+
+          <text x="555" y="640" text-anchor="middle" fill="#f8fafc" font-size="11" font-weight="bold">개발 & 유튜브 스튜디오</text>
+          <text x="555" y="655" text-anchor="middle" fill="#c4b5fd" font-size="9">3,200 × 3,000mm (차음설계)</text>
+
+          <!-- 남측 창호 W5: 턴앤틸트 시스템 환기창 (1,500 × 1,200mm -> 폭 112px: X 440 ~ 552) -->
+          <line x1="440" y1="728" x2="552" y2="728" stroke="#38bdf8" stroke-width="6"/>
+          <text x="496" y="742" text-anchor="middle" fill="#38bdf8" font-size="9" font-weight="bold">W5 (작업실 턴앤틸트창 1500×1200)</text>
+
+          <!-- 작업실-욕실 복도벽 및 D5 차음 가스켓 도어 (폭 900mm -> 68px) -->
+          <line x1="620" y1="511" x2="620" y2="570" stroke="#475569" stroke-width="3"/>
+          <line x1="620" y1="570" x2="620" y2="638" stroke="#10b981" stroke-width="4"/>
+          <path d="M 620 570 A 68 68 0 0 1 688 638" fill="none" stroke="#10b981" stroke-width="1.2" stroke-dasharray="2 2"/>
+          <line x1="620" y1="638" x2="620" y2="720" stroke="#475569" stroke-width="3"/>
+          <text x="608" y="605" text-anchor="middle" fill="#10b981" font-size="8" font-weight="bold" transform="rotate(-90 608 605)">D5 (차음도어 900mm)</text>
+
+          <!-- 실 3. 호텔식 욕실 & 파우더존 (2,600 × 3,000mm -> 195 × 225px: X 620 ~ 815) -->
+          <rect x="623" y="511" width="184" height="209" fill="#0369a1" fill-opacity="0.2"/>
+          <!-- 건식 세면대 카운터 (1,100 × 550mm -> 82 × 41px) -->
+          <rect x="635" y="520" width="82" height="42" rx="3" fill="#1e293b" stroke="#38bdf8" stroke-width="1"/>
+          <circle cx="676" cy="541" r="14" fill="#0f172a" stroke="#0ea5e9" stroke-width="1.2"/>
+          <text x="676" y="575" text-anchor="middle" fill="#e0f2fe" font-size="8">건식 세면대</text>
+
+          <!-- 세탁기·건조기 타워 (800 × 800mm -> 60 × 60px) -->
+          <rect x="740" y="520" width="60" height="60" rx="3" fill="#1e293b" stroke="#64748b" stroke-width="1"/>
+          <circle cx="770" cy="550" r="18" fill="#0f172a" stroke="#38bdf8" stroke-width="1"/>
+          <text x="770" y="554" text-anchor="middle" fill="#38bdf8" font-size="7">세탁타워</text>
+
+          <!-- 양변기 존 (양변기: 450 × 700mm -> 34 × 52px) -->
+          <rect x="640" y="640" width="34" height="52" rx="6" fill="#f8fafc" stroke="#94a3b8" stroke-width="1"/>
+          <text x="657" y="668" text-anchor="middle" fill="#0f172a" font-size="7" font-weight="bold">양변기</text>
+
+          <!-- 독립 샤워부스 (950 × 950mm -> 71 × 71px 유리 파티션) -->
+          <rect x="725" y="635" width="75" height="72" rx="2" fill="#0c4a6e" stroke="#38bdf8" stroke-width="1.2"/>
+          <circle cx="762" cy="671" r="8" fill="none" stroke="#38bdf8" stroke-width="1.5"/>
+          <text x="762" y="693" text-anchor="middle" fill="#bae6fd" font-size="8">샤워부스</text>
+
+          <!-- D7 욕실 도어 (폭 800mm -> 60px) -->
+          <line x1="645" y1="511" x2="705" y2="511" stroke="#10b981" stroke-width="5"/>
+          <text x="675" y="504" text-anchor="middle" fill="#10b981" font-size="8" font-weight="bold">D7 (욕실문 800)</text>
+
+          <!-- 남측 창호 W6: 욕실 습기 배출창 (600 × 600mm -> 폭 45px: X 735 ~ 780) -->
+          <line x1="735" y1="728" x2="780" y2="728" stroke="#38bdf8" stroke-width="5"/>
+          <text x="757" y="742" text-anchor="middle" fill="#38bdf8" font-size="8">W6 (습기창)</text>
+
+
+          <!-- ================= [6] 최하단 외곽 치수선 (WING B 가로 치수선) ================= -->
+          <!-- 동 B 실별 세부 가로 치수선 (Y = 760) -->
+          <!-- 1. 침실 3,200mm (폭 240px: 140 ~ 380) -->
+          <line x1="140" y1="760" x2="380" y2="760" class="dim-solid" marker-start="url(#arrowStart)" marker-end="url(#arrowEnd)"/>
+          <line x1="140" y1="728" x2="140" y2="770" class="dim-line"/>
+          <line x1="380" y1="728" x2="380" y2="770" class="dim-line"/>
+          <text x="260" y="755" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="monospace">침실: 3,200 mm</text>
+
+          <!-- 2. 작업실 3,200mm (폭 240px: 380 ~ 620) -->
+          <line x1="380" y1="760" x2="620" y2="760" class="dim-solid" marker-start="url(#arrowStart)" marker-end="url(#arrowEnd)"/>
+          <line x1="620" y1="728" x2="620" y2="770" class="dim-line"/>
+          <text x="500" y="755" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="monospace">작업실: 3,200 mm</text>
+
+          <!-- 3. 욕실 2,600mm (폭 195px: 620 ~ 815) -->
+          <line x1="620" y1="760" x2="815" y2="760" class="dim-solid" marker-start="url(#arrowStart)" marker-end="url(#arrowEnd)"/>
+          <line x1="815" y1="728" x2="815" y2="770" class="dim-line"/>
+          <text x="717" y="755" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="monospace">욕실: 2,600 mm</text>
+
+          <!-- ================= [7] 우측 세로 치수선 (연결복도 및 중정 길이) ================= -->
+          <!-- 연결복도 폭 2,200mm (X 650 ~ 815 -> 165px) -->
+          <line x1="835" y1="315" x2="835" y2="503" class="dim-solid" marker-start="url(#arrowStart)" marker-end="url(#arrowEnd)"/>
+          <line x1="815" y1="315" x2="845" y2="315" class="dim-line"/>
+          <line x1="815" y1="503" x2="845" y2="503" class="dim-line"/>
+          <text x="850" y="415" fill="#38bdf8" font-size="10" font-family="monospace" transform="rotate(90 850 415)">연결복도 길이 2,500 mm</text>
+
+          <!-- 방위표 (North Indicator) -->
+          <g transform="translate(895, 130)">
+            <circle cx="0" cy="0" r="22" fill="#0f172a" stroke="#334155" stroke-width="1.5"/>
+            <polygon points="0,-18 5,-2 0,-6 -5,-2" fill="#ef4444"/>
+            <polygon points="0,18 5,2 0,6 -5,2" fill="#64748b"/>
+            <text x="0" y="-8" text-anchor="middle" fill="#ef4444" font-size="9" font-weight="bold">N</text>
+            <text x="0" y="28" text-anchor="middle" fill="#94a3b8" font-size="8">방위 (북)</text>
+          </g>
+
+        </svg>
+      </div>
+
+      <!-- 1-B. [신규 확정] 2인 거주 최적화 평면도 (시나리오 1: 내부 최적화형 / 무증축) -->
+      <div id="viewContainerPlan2P" class="w-full flex flex-col items-center hidden">
+        <div class="w-full flex justify-between items-center text-xs text-slate-400 mb-3 px-2">
+          <span class="font-semibold text-emerald-400 flex items-center gap-2">
+            <span>동 A + 동 B [시나리오 1: 2인 거주 최적화 평면도]</span>
+            <span class="text-[11px] text-cyan-300 font-mono">[3분리 욕실 · 1800mm 대면 아일랜드 · 서브 드레스룸 · 현관 클린존]</span>
+          </span>
+          <div class="flex items-center gap-3 text-[11px] font-mono">
+            <span class="text-emerald-400 font-bold">2인 모닝 동선 충돌 0%</span>
+            <span class="text-purple-300">더블 스터드 심야 차음벽</span>
+          </div>
+        </div>
+
+        <svg viewBox="0 0 960 780" class="w-full h-auto select-none" xmlns="http://www.w3.org/2000/svg">
+          <!-- 치수선 정의 마커 상속 -->
+          
+          <!-- 상단 외곽 치수선 9,000mm -->
+          <line x1="140" y1="40" x2="815" y2="40" class="dim-solid" marker-start="url(#arrowCyanStart)" marker-end="url(#arrowCyanEnd)"/>
+          <line x1="140" y1="30" x2="140" y2="90" class="dim-line"/>
+          <line x1="815" y1="30" x2="815" y2="90" class="dim-line"/>
+          <text x="477" y="34" text-anchor="middle" fill="#10b981" font-size="12" font-weight="bold" font-family="monospace">총 길이: 9,000 mm (2인 최적화 시나리오 1)</text>
+
+          <line x1="140" y1="65" x2="275" y2="65" class="dim-solid" marker-start="url(#arrowStart)" marker-end="url(#arrowEnd)"/>
+          <text x="207" y="60" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="monospace">1,800 mm</text>
+          
+          <line x1="275" y1="65" x2="500" y2="65" class="dim-solid" marker-start="url(#arrowStart)" marker-end="url(#arrowEnd)"/>
+          <line x1="275" y1="55" x2="275" y2="90" class="dim-line"/>
+          <text x="387" y="60" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="monospace">3,000 mm</text>
+
+          <line x1="500" y1="65" x2="815" y2="65" class="dim-solid" marker-start="url(#arrowStart)" marker-end="url(#arrowEnd)"/>
+          <line x1="500" y1="55" x2="500" y2="90" class="dim-line"/>
+          <text x="657" y="60" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="monospace">4,200 mm</text>
+
+          <!-- 좌측 세로 치수선 -->
+          <line x1="35" y1="90" x2="35" y2="728" class="dim-solid" marker-start="url(#arrowCyanStart)" marker-end="url(#arrowCyanEnd)"/>
+          <line x1="25" y1="90" x2="140" y2="90" class="dim-line"/>
+          <line x1="25" y1="728" x2="140" y2="728" class="dim-line"/>
+          <text x="25" y="415" text-anchor="middle" fill="#10b981" font-size="11" font-weight="bold" font-family="monospace" transform="rotate(-90 25 415)">전체 대지 점유 폭: 8,500 mm</text>
+
+          <line x1="75" y1="90" x2="75" y2="315" class="dim-solid" marker-start="url(#arrowStart)" marker-end="url(#arrowEnd)"/>
+          <text x="65" y="205" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="monospace" transform="rotate(-90 65 205)">동A 폭 3,000 mm</text>
+
+          <line x1="75" y1="315" x2="75" y2="503" class="dim-solid" marker-start="url(#arrowStart)" marker-end="url(#arrowEnd)"/>
+          <text x="65" y="410" text-anchor="middle" fill="#f59e0b" font-size="10" font-family="monospace" transform="rotate(-90 65 410)">중정 2,500 mm</text>
+
+          <line x1="75" y1="503" x2="75" y2="728" class="dim-solid" marker-start="url(#arrowStart)" marker-end="url(#arrowEnd)"/>
+          <text x="65" y="618" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="monospace" transform="rotate(-90 65 618)">동B 폭 3,000 mm</text>
+
+          <!-- ================= [동 A: 2인 공용 생활동] ================= -->
+          <rect x="140" y="90" width="675" height="225" rx="4" fill="#0d1829" stroke="#10b981" stroke-width="2.5"/>
+          <rect x="148" y="98" width="659" height="209" fill="#091221" stroke="#334155" stroke-width="1.2"/>
+          <text x="155" y="115" fill="#34d399" font-size="11" font-weight="bold">[동 A] 2인 공용 생활동 (3,000 × 9,000mm)</text>
+
+          <!-- W1 주방 환기창 -->
+          <line x1="340" y1="90" x2="430" y2="90" stroke="#38bdf8" stroke-width="6"/>
+          <text x="385" y="82" text-anchor="middle" fill="#38bdf8" font-size="9" font-weight="bold">W1 (주방 1200×600)</text>
+
+          <!-- D1 현관문 -->
+          <line x1="140" y1="170" x2="140" y2="238" stroke="#10b981" stroke-width="7"/>
+          <path d="M 140 170 A 68 68 0 0 1 208 238" fill="none" stroke="#10b981" stroke-width="1.5" stroke-dasharray="2 2"/>
+          <text x="125" y="205" text-anchor="middle" fill="#10b981" font-size="9" font-weight="bold" transform="rotate(-90 125 205)">D1 (현관문 900mm)</text>
+
+          <!-- 실 1. 현관 클린존 & 2인 수납 (1,800 × 3,000mm) -->
+          <rect x="148" y="98" width="127" height="209" fill="#1e293b" fill-opacity="0.3"/>
+          <!-- 2인 전면 신발장 (폭 1,200mm / 40켤레 수납) -->
+          <rect x="152" y="102" width="40" height="90" rx="2" fill="#334155" stroke="#10b981" stroke-width="1.2"/>
+          <text x="172" y="150" text-anchor="middle" fill="#6ee7b7" font-size="8" font-weight="bold" transform="rotate(-90 172 150)">2인 대형 신발장</text>
+          
+          <!-- 아우터 벤치 & 에어드레서 -->
+          <rect x="152" y="196" width="40" height="30" rx="2" fill="#1e1b4b" stroke="#8b5cf6" stroke-width="1"/>
+          <text x="172" y="215" text-anchor="middle" fill="#c4b5fd" font-size="7">외투 수납</text>
+
+          <!-- 인피자 자전거 (벽면 상부 수직 리프트 거치) -->
+          <rect x="198" y="245" width="70" height="30" rx="3" fill="#0f172a" stroke="#06b6d4" stroke-width="1" stroke-dasharray="2 2"/>
+          <text x="233" y="260" text-anchor="middle" fill="#22d3ee" font-size="7" font-weight="bold">자전거 상부 수직거치</text>
+          <text x="233" y="270" text-anchor="middle" fill="#94a3b8" font-size="6">(기름때/정비용품 중정 이전)</text>
+
+          <!-- D2 3연동 중문 -->
+          <line x1="275" y1="98" x2="275" y2="155" stroke="#475569" stroke-width="3"/>
+          <line x1="275" y1="155" x2="275" y2="245" stroke="#10b981" stroke-width="4" stroke-dasharray="4 2"/>
+          <line x1="275" y1="245" x2="275" y2="307" stroke="#475569" stroke-width="3"/>
+
+          <!-- 실 2. 2인 확장형 주방 & 1,800mm 아일랜드 (3,000 × 3,000mm) -->
+          <rect x="278" y="98" width="222" height="209" fill="#78350f" fill-opacity="0.15"/>
+          <path d="M 285 102 L 485 102 L 485 150 L 440 150 L 440 142 L 285 142 Z" fill="#334155" stroke="#64748b" stroke-width="1"/>
+          <!-- 인덕션 & 싱크볼 & 냉장고 -->
+          <rect x="300" y="106" width="45" height="28" fill="#1e293b" stroke="#e11d48"/>
+          <rect x="365" y="106" width="55" height="26" rx="2" fill="#0f172a" stroke="#0ea5e9"/>
+          <rect x="430" y="102" width="60" height="60" fill="#1e293b" stroke="#94a3b8"/>
+          <text x="460" y="136" text-anchor="middle" fill="#cbd5e1" font-size="8">양문냉장고</text>
+
+          <!-- ★ [핵심] 대면형 다이닝 아일랜드 (1,800 × 800mm -> 135px × 60px: 2인 동시 조리 & 마주보기 식사) -->
+          <rect x="320" y="185" width="135" height="60" rx="4" fill="#451a03" stroke="#f59e0b" stroke-width="1.8"/>
+          <text x="387" y="212" text-anchor="middle" fill="#fef3c7" font-size="10" font-weight="bold">1,800 × 800mm 대면 아일랜드</text>
+          <text x="387" y="226" text-anchor="middle" fill="#fbbf24" font-size="8 font-mono">2인 동시 조리 동선 + 마주보기 식사</text>
+          <!-- 바 스툴 4개 -->
+          <rect x="340" y="168" width="24" height="14" rx="2" fill="#78350f"/>
+          <rect x="410" y="168" width="24" height="14" rx="2" fill="#78350f"/>
+          <rect x="340" y="248" width="24" height="14" rx="2" fill="#78350f"/>
+          <rect x="410" y="248" width="24" height="14" rx="2" fill="#78350f"/>
+
+          <!-- 실 3. 오픈 거실 & 라운지 (4,200 × 3,000mm) -->
+          <rect x="500" y="98" width="307" height="209" fill="#064e3b" fill-opacity="0.15"/>
+          <rect x="550" y="105" width="168" height="58" rx="4" fill="#1e293b" stroke="#334155"/>
+          <text x="634" y="135" text-anchor="middle" fill="#e2e8f0" font-size="9">3~4인용 패브릭 소파 (2,200mm)</text>
+          <rect x="590" y="170" width="78" height="35" rx="3" fill="#334155" stroke="#475569"/>
+          <rect x="780" y="125" width="25" height="120" fill="#0f172a" stroke="#475569"/>
+          <text x="792" y="188" text-anchor="middle" fill="#94a3b8" font-size="8" transform="rotate(90 792 188)">65" TV 아트월</text>
+          <text x="635" y="225" text-anchor="middle" fill="#f8fafc" font-size="11" font-weight="bold">2인 라운지 거실</text>
+
+          <!-- W2 / D3 거실 파티오 도어 -->
+          <line x1="530" y1="315" x2="755" y2="315" stroke="#38bdf8" stroke-width="7"/>
+          <line x1="600" y1="315" x2="680" y2="315" stroke="#10b981" stroke-width="7"/>
+          <text x="642" y="307" text-anchor="middle" fill="#38bdf8" font-size="9" font-weight="bold">W2 / D3 (거실 3m 슬라이딩 통창: 중정 출입 전용)</text>
+
+
+          <!-- ================= [중정 데크 & 고단열 연결 복도] ================= -->
+          <!-- 방킬라이 중정 데크 -->
+          <rect x="140" y="315" width="510" height="188" fill="url(#bangkiraiPattern)" stroke="#b45309" stroke-width="2"/>
+          <text x="390" y="390" text-anchor="middle" fill="#fef3c7" font-size="13" font-weight="bold">프라이빗 방킬라이 우드 중정 (2.5m × 6.8m)</text>
+          
+          <!-- 야외 티테이블 2인 -->
+          <rect x="335" y="440" width="90" height="45" rx="3" fill="#78350f" stroke="#d97706" stroke-width="1.2"/>
+          <text x="380" y="466" text-anchor="middle" fill="#fed7aa" font-size="8" font-weight="bold">2인 티테이블</text>
+          <rect x="305" y="445" width="22" height="35" rx="2" fill="#451a03"/>
+          <rect x="432" y="445" width="22" height="35" rx="2" fill="#451a03"/>
+
+          <!-- ★ 중정 서측 구석: 자전거 정비 캐비닛 (실내 기름때 분리) -->
+          <rect x="150" y="430" width="60" height="55" rx="2" fill="#0f172a" stroke="#06b6d4" stroke-width="1.5"/>
+          <text x="180" y="455" text-anchor="middle" fill="#22d3ee" font-size="7" font-weight="bold">자전거 정비</text>
+          <text x="180" y="467" text-anchor="middle" fill="#94a3b8" font-size="6">기밀 캐비닛</text>
+
+          <!-- 고단열 연결 복도: 폭 2,200mm × 길이 2,500mm -->
+          <rect x="650" y="315" width="165" height="188" fill="#1e293b" stroke="#475569" stroke-width="2"/>
+          <!-- W7 개폐창 (도어 없음!) -->
+          <line x1="650" y1="315" x2="650" y2="365" stroke="#64748b" stroke-width="6"/>
+          <line x1="650" y1="365" x2="650" y2="455" stroke="#38bdf8" stroke-width="7"/>
+          <line x1="650" y1="455" x2="650" y2="503" stroke="#64748b" stroke-width="6"/>
+          <text x="635" y="415" text-anchor="middle" fill="#38bdf8" font-size="8" font-weight="bold" transform="rotate(-90 635 415)">W7 개폐식 창호 (1200×800)</text>
+
+          <!-- 동측 완전 차폐벽 -->
+          <line x1="815" y1="315" x2="815" y2="503" stroke="#0ea5e9" stroke-width="8"/>
+          <text x="732" y="405" text-anchor="middle" fill="#f8fafc" font-size="11" font-weight="bold">고단열 연결 복도</text>
+          <text x="732" y="420" text-anchor="middle" fill="#34d399" font-size="9" font-weight="bold">도어 배제 (현관문 1개)</text>
+
+
+          <!-- ================= [동 B: 2인 프라이빗 침실·작업·3분리 욕실동] ================= -->
+          <rect x="140" y="503" width="675" height="225" rx="4" fill="#0d1829" stroke="#10b981" stroke-width="2.5"/>
+          <rect x="148" y="511" width="659" height="209" fill="#091221" stroke="#334155" stroke-width="1.2"/>
+          <text x="155" y="528" fill="#34d399" font-size="11" font-weight="bold">[동 B] 2인 침실 · 스마트 워크룸 · 3분리 욕실동 (3,000 × 9,000mm)</text>
+
+          <!-- W4 침실창 -->
+          <line x1="190" y1="503" x2="325" y2="503" stroke="#38bdf8" stroke-width="6"/>
+          <text x="257" y="496" text-anchor="middle" fill="#38bdf8" font-size="9" font-weight="bold">W4 (침실 중정 조망창 1800×1800)</text>
+
+          <!-- 실 1. 독립 마스터 침실 (3,200 × 3,000mm) -->
+          <rect x="148" y="511" width="232" height="209" fill="#064e3b" fill-opacity="0.2"/>
+          
+          <!-- ★ 퀸 침대 (1,500 × 2,000mm) + 하부 4개 대형 언더베드 수납 서랍장 -->
+          <rect x="160" y="545" width="112" height="150" rx="5" fill="#1e3a5f" stroke="#38bdf8" stroke-width="1.5"/>
+          <!-- 베개 2개 -->
+          <rect x="170" y="552" width="40" height="25" rx="3" fill="#334155"/>
+          <rect x="222" y="552" width="40" height="25" rx="3" fill="#334155"/>
+          <!-- 침대 하부 4서랍 점선 표시 -->
+          <rect x="164" y="605" width="50" height="36" fill="none" stroke="#f59e0b" stroke-width="1" stroke-dasharray="2 2"/>
+          <rect x="218" y="605" width="50" height="36" fill="none" stroke="#f59e0b" stroke-width="1" stroke-dasharray="2 2"/>
+          <rect x="164" y="645" width="50" height="36" fill="none" stroke="#f59e0b" stroke-width="1" stroke-dasharray="2 2"/>
+          <rect x="218" y="645" width="50" height="36" fill="none" stroke="#f59e0b" stroke-width="1" stroke-dasharray="2 2"/>
+          <text x="216" y="595" text-anchor="middle" fill="#ffffff" font-size="10" font-weight="bold">퀸 침대 (1500×2000)</text>
+          <text x="216" y="630" text-anchor="middle" fill="#fde047" font-size="8" font-weight="bold">하부 4개 대형 서랍장</text>
+          <text x="216" y="670" text-anchor="middle" fill="#94a3b8" font-size="7">(이불/캐리어/의류 수납)</text>
+
+          <!-- 좌우 듀얼 무선충전 협탁 -->
+          <rect x="149" y="545" width="10" height="28" fill="#334155" stroke="#475569"/>
+          <rect x="274" y="545" width="28" height="28" rx="2" fill="#334155" stroke="#475569"/>
+          <text x="288" y="562" text-anchor="middle" fill="#94a3b8" font-size="6">협탁</text>
+
+          <!-- 4도어 붙박이장 (2,200 × 600mm) -->
+          <rect x="160" y="675" width="165" height="38" fill="#1e293b" stroke="#475569"/>
+          <text x="242" y="698" text-anchor="middle" fill="#cbd5e1" font-size="8">4도어 메인 붙박이장 (2,200mm)</text>
+
+          <!-- ★ [핵심] 더블 스터드 차음벽 (석고 2P + 글라스울 50K) 및 가스켓 차음 도어 D6 -->
+          <rect x="376" y="511" width="8" height="74" fill="#7c3aed" stroke="#6d28d9"/>
+          <line x1="380" y1="585" x2="380" y2="653" stroke="#10b981" stroke-width="5"/>
+          <rect x="376" y="653" width="8" height="67" fill="#7c3aed" stroke="#6d28d9"/>
+          <text x="365" y="620" text-anchor="middle" fill="#a78bfa" font-size="8" font-weight="bold" transform="rotate(-90 365 620)">더블 차음벽+도어</text>
+
+          <!-- 실 2. 스마트 워크룸 & 서브 드레스룸 (3,200 × 3,000mm) -->
+          <rect x="384" y="511" width="236" height="209" fill="#4c1d95" fill-opacity="0.2"/>
+          
+          <!-- 북측: 1,500mm 코딩 데스크 (1,500 × 750mm -> 112px × 56px) -->
+          <rect x="420" y="525" width="112" height="56" rx="3" fill="#1e1b4b" stroke="#8b5cf6" stroke-width="1.5"/>
+          <rect x="435" y="529" width="38" height="9" rx="1" fill="#0f172a" stroke="#38bdf8"/>
+          <rect x="480" y="529" width="38" height="9" rx="1" fill="#0f172a" stroke="#38bdf8"/>
+          <circle cx="476" cy="600" r="15" fill="#312e81" stroke="#6366f1"/>
+          <text x="476" y="555" text-anchor="middle" fill="#e0e7ff" font-size="9" font-weight="bold">1,500mm 코딩 데스크</text>
+          <text x="476" y="568" text-anchor="middle" fill="#c7d2fe" font-size="7">심야 코딩/녹음 격리</text>
+
+          <!-- ★ [핵심] 남측: 서브 드레스룸 & 스타일러 시스템장 (1,500 × 600mm -> 112px × 45px) -->
+          <rect x="420" y="665" width="112" height="45" rx="3" fill="#1e293b" stroke="#10b981" stroke-width="1.5"/>
+          <text x="476" y="685" text-anchor="middle" fill="#6ee7b7" font-size="9" font-weight="bold">서브 드레스룸 (1,500mm)</text>
+          <text x="476" y="698" text-anchor="middle" fill="#94a3b8" font-size="7">스타일러 + 시스템 행거 (2인 의류 수용)</text>
+
+          <!-- W5 작업실 턴앤틸트창 -->
+          <line x1="440" y1="728" x2="552" y2="728" stroke="#38bdf8" stroke-width="6"/>
+          <text x="496" y="742" text-anchor="middle" fill="#38bdf8" font-size="9" font-weight="bold">W5 (턴앤틸트 1500×1200)</text>
+
+          <!-- D5 차음 가스켓 도어 -->
+          <line x1="620" y1="570" x2="620" y2="638" stroke="#10b981" stroke-width="4"/>
+          <text x="608" y="605" text-anchor="middle" fill="#10b981" font-size="8" font-weight="bold" transform="rotate(-90 608 605)">D5 차음도어</text>
+
+          <!-- ★ 실 3. [핵심] 호텔식 3분리 건식 욕실 (Three-way Split: 2,600 × 3,000mm) -->
+          <rect x="620" y="511" width="187" height="209" fill="#0369a1" fill-opacity="0.2"/>
+          
+          <!-- 1) 복도형 와이드 듀얼 세면/파우더 카운터 (폭 1,200 × 550mm -> 90px × 41px) -->
+          <rect x="635" y="520" width="90" height="42" rx="3" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5"/>
+          <circle cx="660" cy="541" r="11" fill="#0f172a" stroke="#0ea5e9"/>
+          <circle cx="700" cy="541" r="11" fill="#0f172a" stroke="#0ea5e9"/>
+          <text x="680" y="575" text-anchor="middle" fill="#bae6fd" font-size="8" font-weight="bold">와이드 파우더/세면대 (2인 동시 화장/세안)</text>
+
+          <!-- 2) 세탁/건조기 타워 -->
+          <rect x="740" y="520" width="55" height="55" rx="3" fill="#1e293b" stroke="#64748b"/>
+          <circle cx="767" cy="547" r="16" fill="#0f172a" stroke="#38bdf8"/>
+          <text x="767" y="551" text-anchor="middle" fill="#38bdf8" font-size="7">세탁타워</text>
+
+          <!-- 3) 독립 밀폐 양변기실 (포켓도어 D7-A 분리, 프라이버시 100%) -->
+          <rect x="630" y="625" width="75" height="85" fill="#082f49" stroke="#0284c7" stroke-width="1.2"/>
+          <rect x="645" y="645" width="32" height="48" rx="6" fill="#f8fafc"/>
+          <!-- D7-A 포켓도어 -->
+          <line x1="630" y1="625" x2="685" y2="625" stroke="#10b981" stroke-width="4" stroke-dasharray="3 2"/>
+          <text x="667" y="620" text-anchor="middle" fill="#10b981" font-size="7">D7-A 포켓문</text>
+          <text x="667" y="700" text-anchor="middle" fill="#e0f2fe" font-size="7" font-weight="bold">독립 화장실</text>
+
+          <!-- 4) 독립 샤워부스 (유리도어 D7-B 분리) -->
+          <rect x="715" y="625" width="85" height="85" rx="2" fill="#0c4a6e" stroke="#38bdf8" stroke-width="1.5"/>
+          <circle cx="757" cy="667" r="9" fill="none" stroke="#38bdf8" stroke-width="1.5"/>
+          <line x1="715" y1="625" x2="715" y2="675" stroke="#38bdf8" stroke-width="4"/>
+          <text x="757" y="700" text-anchor="middle" fill="#bae6fd" font-size="8" font-weight="bold">독립 샤워실</text>
+
+          <text x="713" y="605" text-anchor="middle" fill="#34d399" font-size="8" font-weight="bold">★ 3분리 욕실 (아침 동선 충돌 0)</text>
+
+          <!-- W6 습기창 -->
+          <line x1="740" y1="728" x2="785" y2="728" stroke="#38bdf8" stroke-width="5"/>
+          <text x="762" y="742" text-anchor="middle" fill="#38bdf8" font-size="8">W6</text>
+
+          <!-- 하단 치수선 -->
+          <line x1="140" y1="760" x2="380" y2="760" class="dim-solid" marker-start="url(#arrowStart)" marker-end="url(#arrowEnd)"/>
+          <text x="260" y="755" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="monospace">침실: 3,200 mm</text>
+          
+          <line x1="380" y1="760" x2="620" y2="760" class="dim-solid" marker-start="url(#arrowStart)" marker-end="url(#arrowEnd)"/>
+          <text x="500" y="755" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="monospace">작업·드레스룸: 3,200 mm</text>
+
+          <line x1="620" y1="760" x2="815" y2="760" class="dim-solid" marker-start="url(#arrowStart)" marker-end="url(#arrowEnd)"/>
+          <text x="717" y="755" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="monospace">3분리 욕실: 2,600 mm</text>
+        </svg>
+      </div>
+
+      <!-- 2. Concept Diagram: Courtyard & Glass Breezeway (Scale Aligned) -->
+      <div id="viewContainerConcept" class="w-full flex flex-col items-center hidden">
+        <div class="w-full flex justify-between items-center text-xs text-slate-400 mb-2 px-1">
+          <span class="font-semibold text-white">중정 우드 데크와 유리 연결통로의 시선 차단 원리</span>
+          <span class="font-mono text-[11px] bg-[#070d19] border border-[#1e3250] text-slate-300 px-2 py-0.5 rounded">3:1 정축척 모듈 연동</span>
+        </div>
+
+        <svg viewBox="0 0 900 500" class="w-full h-auto select-none" xmlns="http://www.w3.org/2000/svg">
+          <!-- 대지 배경 65평 -->
+          <rect x="40" y="20" width="820" height="460" rx="8" fill="#064e3b" fill-opacity="0.2" stroke="#047857" stroke-dasharray="4 4"/>
+          <text x="60" y="50" fill="#34d399" font-size="12" font-weight="bold">완주 구이면 대지 65평 (부지 내 므브테이너 ‘ㄱ’자형 연동 배치)</text>
+
+          <!-- 동 A (공용동) -->
+          <rect x="120" y="70" width="540" height="110" rx="4" fill="#0d1829" stroke="#3b82f6" stroke-width="2.5"/>
+          <text x="390" y="125" text-anchor="middle" fill="#93c5fd" font-size="14" font-weight="bold">동 A : 공용 생활동 (3,000 × 9,000mm / 높이 2.9m 컨테이너 벽체)</text>
+          <text x="390" y="145" text-anchor="middle" fill="#60a5fa" font-size="11">현관 전실 + LDK 거실 + 대형 주방</text>
+
+          <!-- 프라이빗 중정 데크 -->
+          <rect x="120" y="180" width="410" height="140" fill="#78350f" fill-opacity="0.35" stroke="#d97706" stroke-width="2.5"/>
+          <text x="325" y="235" text-anchor="middle" fill="#fef3c7" font-size="15" font-weight="bold">프라이빗 중정 (Courtyard) 천연목 데크</text>
+          <text x="325" y="260" text-anchor="middle" fill="#fbbf24" font-size="12">양측 2.9m 컨테이너 벽체가 동서남북 외부 시선을 완전 차단</text>
+          <text x="325" y="280" text-anchor="middle" fill="#94a3b8" font-size="10">폭 2,500mm × 길이 6,800mm (야외 티테이블 / 수동 어닝 / 자전거 정비존)</text>
+
+          <!-- 고단열 연결 복도 (Insulated Corridor) -->
+          <rect x="530" y="180" width="130" height="140" fill="#1e293b" stroke="#38bdf8" stroke-width="2.5"/>
+          <text x="595" y="240" text-anchor="middle" fill="#f8fafc" font-size="12" font-weight="bold">고단열 연결 복도</text>
+          <text x="595" y="258" text-anchor="middle" fill="#38bdf8" font-size="10" font-weight="bold">W7 개폐식 창문</text>
+          <text x="595" y="274" text-anchor="middle" fill="#94a3b8" font-size="9">(2,200 × 2,500mm)</text>
+          <text x="595" y="290" text-anchor="middle" fill="#34d399" font-size="9">도어 배제·단열 극대화</text>
+
+          <!-- 동 B (프라이빗동) -->
+          <rect x="120" y="320" width="540" height="110" rx="4" fill="#0d1829" stroke="#8b5cf6" stroke-width="2.5"/>
+          <text x="390" y="375" text-anchor="middle" fill="#c4b5fd" font-size="14" font-weight="bold">동 B : 독립 침실 & 개발 작업실 & 호텔식 욕실 (3,000 × 9,000mm)</text>
+          <text x="390" y="395" text-anchor="middle" fill="#a78bfa" font-size="11">퀸 침대(1,500×2,000) + 1,800mm 코딩 데스크 + 차음벽/도어 완비</text>
+
+          <!-- 좌우 시선 차단 화살표 -->
+          <line x1="50" y1="250" x2="110" y2="250" stroke="#f87171" stroke-width="3" stroke-dasharray="3 3"/>
+          <text x="80" y="240" text-anchor="middle" fill="#f87171" font-size="10" font-weight="bold">외부 시선 차단</text>
+
+          <line x1="670" y1="250" x2="730" y2="250" stroke="#f87171" stroke-width="3" stroke-dasharray="3 3"/>
+          <text x="700" y="240" text-anchor="middle" fill="#f87171" font-size="10" font-weight="bold">외부 시선 차단</text>
+        </svg>
+      </div>
+
+    </div>
+
+    <!-- [데이터 정합성 검증표] 건축 치수 데이터 시트 (Dimension Data Sheet) -->
+    <div class="mt-4 bg-[#091221] border border-[var(--border)] rounded-xl p-4">
+      <div class="flex items-center justify-between mb-3 border-b border-slate-800 pb-2">
+        <h3 class="text-sm font-bold text-white flex items-center gap-2">
+          <span>건축 실측 치수 & 데이터 검증 시트 (Verification Data Sheet)</span>
+          <span class="text-[10px] px-2 py-0.5 rounded bg-blue-950 text-blue-300 border border-blue-800">오차 0mm 정합성 일치</span>
+        </h3>
+        <span class="text-xs text-slate-400 font-mono">총 건축 면적: 16.34평 (54.0㎡) + 중정 5.14평 (17.0㎡)</span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-mono">
+        <!-- 동 A 데이터 -->
+        <div class="bg-[#0d1829] p-3 rounded-lg border border-slate-800">
+          <div class="font-bold text-sky-400 mb-2 pb-1 border-b border-slate-700 flex justify-between">
+            <span>[동 A] 공용 생활동 (외경 3,000 × 9,000 mm / 27.0㎡)</span>
+            <span>종횡비 1 : 3.0</span>
+          </div>
+          <table class="w-full text-left text-slate-300">
+            <tbody class="divide-y divide-slate-800">
+              <tr>
+                <td class="py-1 text-slate-400">1. 현관 & 자전거 전실</td>
+                <td class="py-1 text-right text-emerald-400 font-bold">1,800 × 3,000 mm (5.40㎡)</td>
+              </tr>
+              <tr>
+                <td class="py-1 text-slate-400">2. 주방 & 아일랜드 다이닝</td>
+                <td class="py-1 text-right text-emerald-400 font-bold">3,000 × 3,000 mm (9.00㎡)</td>
+              </tr>
+              <tr>
+                <td class="py-1 text-slate-400">3. 오픈 거실 & 라운지</td>
+                <td class="py-1 text-right text-emerald-400 font-bold">4,200 × 3,000 mm (12.60㎡)</td>
+              </tr>
+              <tr class="bg-slate-900/50 font-bold">
+                <td class="py-1 text-sky-300">동 A 가로 길이 총합</td>
+                <td class="py-1 text-right text-sky-300">1,800 + 3,000 + 4,200 = 9,000 mm</td>
+              </tr>
+              <tr>
+                <td class="py-1 text-slate-400">도어 및 창호</td>
+                <td class="py-1 text-right text-slate-300">D1(900), D2(1200), W1(1200), W2/D3(3000)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 동 B 데이터 -->
+        <div class="bg-[#0d1829] p-3 rounded-lg border border-slate-800">
+          <div class="font-bold text-purple-400 mb-2 pb-1 border-b border-slate-700 flex justify-between">
+            <span>[동 B] 프라이빗 침실·작업동 (외경 3,000 × 9,000 mm / 27.0㎡)</span>
+            <span>종횡비 1 : 3.0</span>
+          </div>
+          <table class="w-full text-left text-slate-300">
+            <tbody class="divide-y divide-slate-800">
+              <tr>
+                <td class="py-1 text-slate-400">1. 독립 마스터 침실</td>
+                <td class="py-1 text-right text-purple-300 font-bold">3,200 × 3,000 mm (9.60㎡)</td>
+              </tr>
+              <tr>
+                <td class="py-1 text-slate-400">2. 독립 개발 & 유튜브 작업실</td>
+                <td class="py-1 text-right text-purple-300 font-bold">3,200 × 3,000 mm (9.60㎡)</td>
+              </tr>
+              <tr>
+                <td class="py-1 text-slate-400">3. 호텔식 욕실 & 파우더존</td>
+                <td class="py-1 text-right text-purple-300 font-bold">2,600 × 3,000 mm (7.80㎡)</td>
+              </tr>
+              <tr class="bg-slate-900/50 font-bold">
+                <td class="py-1 text-purple-300">동 B 가로 길이 총합</td>
+                <td class="py-1 text-right text-purple-300">3,200 + 3,200 + 2,600 = 9,000 mm</td>
+              </tr>
+              <tr>
+                <td class="py-1 text-slate-400">핵심 가구 실측</td>
+                <td class="py-1 text-right text-amber-300">퀸침대(1500×2000), 코딩데스크(1800×800)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Explanatory Breakdown Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4 text-xs">
+      <div class="bg-[var(--background)] border border-[var(--border)] rounded-lg p-3">
+        <span class="text-[11px] font-bold text-emerald-400">1. 퀸 침대 정축척 반영 (1,500 × 2,000mm)</span>
+        <h4 class="font-bold text-white mt-0.5">실제 축척 112px × 150px 렌더링</h4>
+        <p class="text-slate-400 mt-1 leading-relaxed">
+          - 3,200 × 3,000mm 침실 면적 대비 퀸 침대가 차지하는 비율을 1:1로 정밀 구현했습니다.<br>
+          - 침대 좌측(100mm) 벽체 이격, 우측(400mm) 무선충전 협탁, 하단(600mm) 붙박이장 개폐 여유 동선을 확보했습니다.
+        </p>
+      </div>
+      <div class="bg-[var(--background)] border border-[var(--border)] rounded-lg p-3">
+        <span class="text-[11px] font-bold text-blue-400">2. 도어 & 창호 전수 규격화</span>
+        <h4 class="font-bold text-white mt-0.5">현관문 1개 단일화 & W1~W7 창호</h4>
+        <p class="text-slate-400 mt-1 leading-relaxed">
+          - <strong>D1 현관문</strong>: 900mm 방화문 (외부 출입문 단일화로 방범 극대화)<br>
+          - <strong>D2/D3</strong>: 1,200mm 중문 + 거실 3m 슬라이딩 파티오 도어<br>
+          - <strong>D4 복도문 삭제</strong>: 문틈 결로·침입 위험 제거 ➔ 완전 벽체화<br>
+          - <strong>W7 복도창</strong>: 1,200 × 800mm 개폐식 턴앤틸트 환기창
+        </p>
+      </div>
+      <div class="bg-[var(--background)] border border-[var(--border)] rounded-lg p-3">
+        <span class="text-[11px] font-bold text-amber-400">3. 방킬라이 중정 & 고단열 연결 복도</span>
+        <h4 class="font-bold text-white mt-0.5">150mm 패널벽 + 턴앤틸트 맞바람 환기</h4>
+        <p class="text-slate-400 mt-1 leading-relaxed">
+          - 통유리와 야외 도어를 완전히 배제하고 <strong>150mm 우레탄 패널 + 징크 지붕</strong>으로 시공했습니다.<br>
+          - 필요 시 <strong>W7 환기창</strong>을 열어 중정의 바람을 통풍시키고, 겨울엔 보일러 난방 연계로 결로가 0%입니다.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function switchView(view) {
+      const btnPlan = document.getElementById('btnViewPlan');
+      const btnPlan2P = document.getElementById('btnViewPlan2P');
+      const btnConcept = document.getElementById('btnViewConcept');
+      const planContainer = document.getElementById('viewContainerPlan');
+      const plan2PContainer = document.getElementById('viewContainerPlan2P');
+      const conceptContainer = document.getElementById('viewContainerConcept');
+
+      // 리셋
+      [btnPlan, btnPlan2P, btnConcept].forEach(b => b.className = "px-3 py-1.5 rounded font-medium transition-all text-slate-400 hover:text-white");
+      [planContainer, plan2PContainer, conceptContainer].forEach(c => c.classList.add('hidden'));
+
+      if (view === 'plan') {
+        btnPlan.className = "px-3 py-1.5 rounded font-medium transition-all bg-blue-600 text-white shadow-sm";
+        planContainer.classList.remove('hidden');
+      } else if (view === 'plan2p') {
+        btnPlan2P.className = "px-3 py-1.5 rounded font-medium transition-all bg-emerald-600 text-white shadow-sm";
+        plan2PContainer.classList.remove('hidden');
+      } else if (view === 'concept') {
+        btnConcept.className = "px-3 py-1.5 rounded font-medium transition-all bg-blue-600 text-white shadow-sm";
+        conceptContainer.classList.remove('hidden');
+      }
+    }
+  </script>
+</body>
+</html>

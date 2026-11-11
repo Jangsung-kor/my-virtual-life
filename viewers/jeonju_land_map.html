@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>전주 근교 토지 후보지 및 예산 배분 분석</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    :root {
+      --background: #091221;
+      --card: #0d1829;
+      --border: #1e3250;
+      --foreground: #f1f5f9;
+      --muted-foreground: #94a3b8;
+      --primary: #38bdf8;
+    }
+    .region-node {
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .region-node:hover {
+      filter: brightness(1.2);
+    }
+    .region-node.active path, .region-node.active rect {
+      stroke: #38bdf8 !important;
+      stroke-width: 2.5px !important;
+      filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.5));
+    }
+  </style>
+</head>
+<body class="bg-[#070d19] text-slate-100 antialiased p-3 font-sans">
+  <div class="bg-[var(--card)] text-[var(--foreground)] border border-[var(--border)] rounded-xl p-5 shadow-sm max-w-4xl mx-auto">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-4 mb-4 border-b border-[var(--border)] gap-2">
+      <div>
+        <h2 class="text-[var(--foreground)] font-bold text-lg">전주 근교 토지 후보지 및 트레이드오프 분석</h2>
+        <p class="text-[var(--muted-foreground)] text-xs mt-0.5">총 가용 예산: 9,360만 원 | 기반시설(1,800만) 및 예비비(560만) 고정</p>
+      </div>
+      <div class="inline-flex rounded-lg border border-[var(--border)] p-1 bg-[#070d19] text-xs">
+        <button id="btnOptionA" onclick="selectOption('A')" class="px-3 py-1 rounded font-medium transition-all bg-blue-600 text-white shadow-sm">
+          A안: 외곽 + 넓은 므브테이너(16평)
+        </button>
+        <button id="btnOptionB" onclick="selectOption('B')" class="px-3 py-1 rounded font-medium transition-all text-[var(--muted-foreground)] hover:text-white">
+          B안: 도심 인접 + 콤팩트(8평)
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Grid: Map & Details -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+      <!-- Left: Interactive SVG Map (7 cols) -->
+      <div class="lg:col-span-7 bg-[var(--background)] border border-[var(--border)] rounded-lg p-3 flex flex-col items-center justify-center relative">
+        <div class="w-full flex justify-between items-center text-xs text-[var(--muted-foreground)] mb-2 px-1">
+          <span>지역 노드를 클릭하면 세부 정보가 연동됩니다</span>
+          <span class="font-mono text-[11px]">축척: 전주 중심 반경 15km</span>
+        </div>
+
+        <svg viewBox="0 0 500 480" class="w-full h-auto max-h-[380px] select-none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Definitions -->
+          <defs>
+            <radialGradient id="jeonjuGrad" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.25"/>
+              <stop offset="100%" stop-color="#38bdf8" stop-opacity="0.03"/>
+            </radialGradient>
+          </defs>
+
+          <!-- Distance Rings -->
+          <circle cx="250" cy="240" r="80" fill="none" stroke="#1e3250" stroke-dasharray="4 4" opacity="0.8"/>
+          <circle cx="250" cy="240" r="160" fill="none" stroke="#1e3250" stroke-dasharray="4 4" opacity="0.6"/>
+          <text x="255" y="155" fill="#64748b" font-size="10">5km (차량 10분)</text>
+          <text x="255" y="75" fill="#64748b" font-size="10">12km (차량 20분)</text>
+
+          <!-- Jeonju Urban Core -->
+          <ellipse cx="250" cy="240" rx="65" ry="70" fill="url(#jeonjuGrad)" stroke="#38bdf8" stroke-width="1.5" stroke-dasharray="3 3"/>
+          <text x="250" y="225" text-anchor="middle" fill="#f1f5f9" font-weight="bold" font-size="13">전주시</text>
+          <text x="250" y="242" text-anchor="middle" fill="#94a3b8" font-size="10">덕진구 · 완산구</text>
+          <text x="250" y="257" text-anchor="middle" fill="#64748b" font-size="9">(도심 상권/종합병원)</text>
+
+          <!-- 1. 완주 이서면 (서쪽, 혁신도시 인접) -->
+          <g id="node-iseo" class="region-node" onclick="selectRegion('iseo')">
+            <rect x="70" y="205" width="95" height="70" rx="8" fill="#0d1829" stroke="#1e3250" stroke-width="1.5"/>
+            <text x="117" y="228" text-anchor="middle" fill="#f1f5f9" font-weight="bold" font-size="12">완주 이서</text>
+            <text x="117" y="244" text-anchor="middle" fill="#f87171" font-size="11" font-weight="600">평당 60~90만</text>
+            <text x="117" y="260" text-anchor="middle" fill="#94a3b8" font-size="10">혁신도시 바로 인접</text>
+          </g>
+          <line x1="165" y1="240" x2="185" y2="240" stroke="#1e3250" stroke-width="1.5"/>
+
+          <!-- 2. 완주 삼례읍 (북서쪽) -->
+          <g id="node-samnye" class="region-node" onclick="selectRegion('samnye')">
+            <rect x="130" y="80" width="95" height="68" rx="8" fill="#0d1829" stroke="#1e3250" stroke-width="1.5"/>
+            <text x="177" y="102" text-anchor="middle" fill="#f1f5f9" font-weight="bold" font-size="12">완주 삼례</text>
+            <text x="177" y="118" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="600">평당 40~65만</text>
+            <text x="177" y="134" text-anchor="middle" fill="#94a3b8" font-size="10">송천동 접근 10분</text>
+          </g>
+          <line x1="200" y1="148" x2="225" y2="180" stroke="#1e3250" stroke-width="1.5"/>
+
+          <!-- 3. 완주 봉동읍 (북동쪽) -->
+          <g id="node-bongdong" class="region-node" onclick="selectRegion('bongdong')">
+            <rect x="290" y="70" width="95" height="68" rx="8" fill="#0d1829" stroke="#1e3250" stroke-width="1.5"/>
+            <text x="337" y="92" text-anchor="middle" fill="#f1f5f9" font-weight="bold" font-size="12">완주 봉동</text>
+            <text x="337" y="108" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="600">평당 35~55만</text>
+            <text x="337" y="124" text-anchor="middle" fill="#94a3b8" font-size="10">산단 및 생활편의</text>
+          </g>
+          <line x1="310" y1="138" x2="280" y2="180" stroke="#1e3250" stroke-width="1.5"/>
+
+          <!-- 4. 완주 소양면 (동쪽) -->
+          <g id="node-soyang" class="region-node" onclick="selectRegion('soyang')">
+            <rect x="350" y="195" width="95" height="70" rx="8" fill="#0d1829" stroke="#1e3250" stroke-width="1.5"/>
+            <text x="397" y="218" text-anchor="middle" fill="#f1f5f9" font-weight="bold" font-size="12">완주 소양</text>
+            <text x="397" y="234" text-anchor="middle" fill="#34d399" font-size="11" font-weight="600">평당 25~40만</text>
+            <text x="397" y="250" text-anchor="middle" fill="#94a3b8" font-size="10">자연·카페·조용함</text>
+          </g>
+          <line x1="350" y1="235" x2="315" y2="240" stroke="#1e3250" stroke-width="1.5"/>
+
+          <!-- 5. 완주 상관면 (동남쪽) -->
+          <g id="node-sanggwan" class="region-node" onclick="selectRegion('sanggwan')">
+            <rect x="315" y="325" width="95" height="68" rx="8" fill="#0d1829" stroke="#1e3250" stroke-width="1.5"/>
+            <text x="362" y="347" text-anchor="middle" fill="#f1f5f9" font-weight="bold" font-size="12">완주 상관</text>
+            <text x="362" y="363" text-anchor="middle" fill="#34d399" font-size="11" font-weight="600">평당 20~35만</text>
+            <text x="362" y="379" text-anchor="middle" fill="#94a3b8" font-size="10">편백숲·최고가성비</text>
+          </g>
+          <line x1="325" y1="325" x2="285" y2="295" stroke="#1e3250" stroke-width="1.5"/>
+
+          <!-- 6. 완주 구이면 (남쪽, 모악산/저수지) -->
+          <g id="node-gui" class="region-node active" onclick="selectRegion('gui')">
+            <rect x="180" y="345" width="105" height="72" rx="8" fill="#0d1829" stroke="#38bdf8" stroke-width="2"/>
+            <text x="232" y="367" text-anchor="middle" fill="#38bdf8" font-weight="bold" font-size="12">완주 구이 ★</text>
+            <text x="232" y="383" text-anchor="middle" fill="#60a5fa" font-size="11" font-weight="600">평당 35~50만</text>
+            <text x="232" y="399" text-anchor="middle" fill="#94a3b8" font-size="10">모악산·최종확정지</text>
+          </g>
+          <line x1="235" y1="345" x2="245" y2="305" stroke="#1e3250" stroke-width="1.5"/>
+        </svg>
+
+        <!-- Legend -->
+        <div class="flex items-center gap-4 text-xs mt-2 text-slate-400">
+          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-[#10b981]"></span> 저렴 (평당 20~40만)</span>
+          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-[#f59e0b]"></span> 보통 (평당 35~65만)</span>
+          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-[#ef4444]"></span> 고가 (평당 60~90만)</span>
+        </div>
+      </div>
+
+      <!-- Right: Detailed Comparison & Budget Calculator (5 cols) -->
+      <div class="lg:col-span-5 flex flex-col justify-between space-y-4">
+        <!-- Selected Region Card -->
+        <div class="bg-[var(--background)] border border-[var(--border)] rounded-lg p-4">
+          <div class="flex justify-between items-start mb-2">
+            <div>
+              <span id="regionBadge" class="text-[11px] font-semibold uppercase px-2 py-0.5 rounded bg-blue-950 text-blue-400 border border-blue-800">최종 확정 후보지</span>
+              <h3 id="regionName" class="text-base font-bold text-white mt-1">완주군 구이면 (모악산/구이저수지)</h3>
+            </div>
+            <div class="text-right">
+              <span id="regionPrice" class="text-sm font-bold text-blue-400">평당 35~50만 원</span>
+              <p id="regionDistance" class="text-[11px] text-slate-400">전주 평화동 차로 10~15분</p>
+            </div>
+          </div>
+          <p id="regionDesc" class="text-xs text-slate-400 leading-relaxed mb-3">
+            모악산 자락과 구이저수지가 인접하여 전주 시민들에게 가장 인기 있는 전원주택 권역입니다. 전주 완산구(평화동/효자동) 도심과 10~15분 내 직결되어 의료 및 장보기 접근성이 우수합니다.
+          </p>
+
+          <div class="space-y-1.5 text-xs border-t border-[var(--border)] pt-2.5">
+            <div class="flex justify-between">
+              <span class="text-slate-400">65평 매입 시 토지비:</span>
+              <span id="calcLandPrice" class="font-semibold text-emerald-400">2,470만 원 (확정)</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-400">크레인/트레일러 진입:</span>
+              <span class="font-semibold text-emerald-400">우수 (4m 포장도로 접합)</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-400">상수도 및 전기 인입:</span>
+              <span class="font-semibold text-white">상수도 직결 및 전주 40m 인접</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Budget Breakdown Bar for Current Mode -->
+        <div class="bg-[var(--background)] border border-[var(--border)] rounded-lg p-4">
+          <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">9,360만 원 예산 집행 구조 시뮬레이션</h4>
+          
+          <div class="space-y-2 text-xs">
+            <!-- Progress Bar -->
+            <div class="w-full h-3 rounded-full overflow-hidden flex bg-[#070d19]">
+              <div id="barLand" class="h-full bg-emerald-500 transition-all duration-300" style="width: 27%;"></div>
+              <div id="barBuild" class="h-full bg-blue-500 transition-all duration-300" style="width: 48%;"></div>
+              <div class="h-full bg-amber-500" style="width: 19%;"></div>
+              <div class="h-full bg-slate-400" style="width: 6%;"></div>
+            </div>
+
+            <!-- Legend items -->
+            <div class="grid grid-cols-2 gap-1 text-[11px] pt-1">
+              <div class="flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded bg-emerald-500"></span>
+                <span class="text-slate-300">토지 매입: <strong id="valLand" class="text-white">2,470만</strong></span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded bg-blue-500"></span>
+                <span class="text-slate-300">므브테이너: <strong id="valBuild" class="text-white">4,500만</strong></span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded bg-amber-500"></span>
+                <span class="text-slate-300">토목/인허가: <strong class="text-white">1,800만</strong></span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded bg-slate-400"></span>
+                <span class="text-slate-300">예비비/태양광: <strong class="text-white">590만</strong></span>
+              </div>
+            </div>
+
+            <!-- Trade-off Summary Box -->
+            <div id="optionSummaryBox" class="mt-2.5 p-2.5 rounded bg-[#0d1829] border border-[var(--border)] text-xs leading-relaxed text-slate-300">
+              <strong class="text-blue-400">최종 확정 (완주 구이):</strong> 평당 38만 원으로 65평(2,470만 원)을 확보하고, 므브테이너 4,500만 원을 투입해 <strong>16.4평형(3x9 2개 연동 + 중정 데크)</strong>을 완공하는 최적의 밸런스 구조입니다.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const regionData = {
+      gui: {
+        name: "완주군 구이면 (모악산/구이저수지)",
+        priceStr: "평당 35~50만 원",
+        distance: "전주 평화동 차로 10~15분",
+        desc: "모악산 자락과 구이저수지가 인접하여 전주 시민들에게 가장 인기 있는 전원주택 권역입니다. 전주 완산구(평화동/효자동) 도심과 10~15분 내 직결되어 의료 및 장보기 접근성이 우수합니다.",
+        calcPrice: "2,470만 원 (65평 확정)",
+        badge: "최종 확정지",
+        level: "mid"
+      },
+      soyang: {
+        name: "완주군 소양면 (오성한옥마을 일대)",
+        priceStr: "평당 25~40만 원",
+        distance: "전주역/아중동 차로 15~20분",
+        desc: "문화 예술 카페와 한옥마을, 산세가 수려한 힐링 권역입니다. 지가가 상대적으로 저렴하여 70~90평의 넉넉한 부지를 2,000만 원 초중반대에 확보 가능합니다.",
+        calcPrice: "약 2,000만 ~ 2,500만 원 (70평 기준)",
+        badge: "가성비 자연형",
+        level: "low"
+      },
+      sanggwan: {
+        name: "완주군 상관면 (편백숲/남관 일대)",
+        priceStr: "평당 20~35만 원",
+        distance: "전주 완산구 남부 차로 12~15분",
+        desc: "전주 도심과 붙어 있으면서도 편백숲 등 자연환경이 뛰어납니다. 완주 내에서 토지 단가가 가장 낮아 토지비를 2,000만 원 이하로 아끼고 므브테이너 주택 규모를 최대화하기 유리합니다.",
+        calcPrice: "약 1,800만 ~ 2,400만 원 (80평 기준)",
+        badge: "최대 가성비",
+        level: "low"
+      },
+      samnye: {
+        name: "완주군 삼례읍 (우석대/예술촌 일대)",
+        priceStr: "평당 40~65만 원",
+        distance: "전주 덕진구 송천동 차로 10분",
+        desc: "전주 북부(에코시티, 송천동) 생활권과 바로 맞닿아 있습니다. 읍내 마트, 병원, 기차역 등 기본 인프라가 풍부하지만 순수 시골 느낌보다는 근교 소도시 느낌이 강합니다.",
+        calcPrice: "약 2,500만 ~ 3,500만 원 (50평 기준)",
+        badge: "도심 인접형",
+        level: "mid"
+      },
+      iseo: {
+        name: "완주군 이서면 (전북혁신도시 인접)",
+        priceStr: "평당 60~90만 원",
+        distance: "전주 서부신시가지 차로 10분",
+        desc: "전북혁신도시 인프라를 도보나 차로 5분 내 이용 가능한 최상급 입지입니다. 다만 지가가 높아 50평 매입 시 3,500만~4,500만 원이 소요되어 므브테이너를 8평 콤팩트형으로 축소해야 합니다.",
+        calcPrice: "약 3,500만 ~ 4,500만 원 (50평 기준)",
+        badge: "고지가 도심형",
+        level: "high"
+      },
+      bongdong: {
+        name: "완주군 봉동읍 (둔산리/완주산단 인근)",
+        priceStr: "평당 35~55만 원",
+        distance: "전주 에코시티 차로 15분",
+        desc: "완주 산업단지와 배후 주거단지가 있어 편의시설이 잘 갖춰져 있습니다. 공업지역과 인접한 단점이 있으나 생활 편의성은 높습니다.",
+        calcPrice: "약 2,200만 ~ 3,000만 원 (60평 기준)",
+        badge: "편의시설 우수",
+        level: "mid"
+      }
+    };
+
+    let currentOption = 'A';
+
+    function selectRegion(key) {
+      document.querySelectorAll('.region-node').forEach(el => el.classList.remove('active'));
+      const activeNode = document.getElementById('node-' + key);
+      if (activeNode) activeNode.classList.add('active');
+
+      const data = regionData[key];
+      if (!data) return;
+
+      document.getElementById('regionName').innerText = data.name;
+      document.getElementById('regionPrice').innerText = data.priceStr;
+      document.getElementById('regionDistance').innerText = data.distance;
+      document.getElementById('regionDesc').innerText = data.desc;
+      document.getElementById('calcLandPrice').innerText = data.calcPrice;
+      document.getElementById('regionBadge').innerText = data.badge;
+    }
+
+    function selectOption(opt) {
+      currentOption = opt;
+      const btnA = document.getElementById('btnOptionA');
+      const btnB = document.getElementById('btnOptionB');
+      const barLand = document.getElementById('barLand');
+      const barBuild = document.getElementById('barBuild');
+      const valLand = document.getElementById('valLand');
+      const valBuild = document.getElementById('valBuild');
+      const summary = document.getElementById('optionSummaryBox');
+
+      if (opt === 'A') {
+        btnA.className = "px-3 py-1 rounded font-medium transition-all bg-blue-600 text-white shadow-sm";
+        btnB.className = "px-3 py-1 rounded font-medium transition-all text-slate-400 hover:text-white";
+        
+        barLand.style.width = "27%";
+        barBuild.style.width = "48%";
+        valLand.innerText = "2,470만";
+        valBuild.innerText = "4,500만";
+
+        summary.innerHTML = `<strong class="text-blue-400">A안 (최종 확정 - 완주 구이 16.4평):</strong> 완주 구이 65평(2,470만 원)을 매입하고 므브테이너에 4,500만 원을 배정하여 <strong>16.4평형(3x9 2개 연동 + 중정 우드 데크)</strong>을 완공했습니다. 독립 개발 작업실과 거실, 자전거 전실이 완벽히 분리됩니다.`;
+      } else {
+        btnB.className = "px-3 py-1 rounded font-medium transition-all bg-blue-600 text-white shadow-sm";
+        btnA.className = "px-3 py-1 rounded font-medium transition-all text-slate-400 hover:text-white";
+
+        barLand.style.width = "41%";
+        barBuild.style.width = "34%";
+        valLand.innerText = "3,800만";
+        valBuild.innerText = "3,200만";
+
+        summary.innerHTML = `<strong class="text-amber-400">B안 (도심 인접 비교안):</strong> 이서·삼례 등 도심/혁신도시와 직결되는 곳에 평당 60~80만 원으로 50평을 약 3,800만 원에 매입할 경우, 주택비가 3,200만 원으로 제한되어 <strong>8.2평 단동형 원룸 스튜디오</strong>로 축소해야 했던 대안입니다.`;
+      }
+    }
+  </script>
+</body>
+</html>

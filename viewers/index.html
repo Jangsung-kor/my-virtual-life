@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>가상 라이프 비주얼 뷰어 포털</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+</head>
+<body class="bg-[#070d19] text-slate-100 antialiased font-sans flex flex-col h-screen overflow-hidden">
+  <!-- Top Navigation Header -->
+  <header class="bg-[#0d1829] border-b border-[#1e3250] px-5 py-3 flex flex-wrap justify-between items-center gap-3 shrink-0">
+    <div>
+      <h1 class="text-base font-bold text-white flex items-center gap-2">
+        <span>가상 라이프 비주얼 아카이브</span>
+        <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-blue-950 text-blue-400 border border-blue-800">통합 포털</span>
+      </h1>
+      <p class="text-xs text-slate-400 mt-0.5">완주 구이 므브테이너 16.4평 하우스 & 토지 시뮬레이터</p>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <nav class="flex items-center gap-1.5 bg-[#070d19] p-1 rounded-lg border border-[#1e3250] text-xs">
+      <button onclick="loadViewer('gui_site_completion_viewer.html', this)" class="nav-btn px-3 py-1.5 rounded font-medium transition-all bg-blue-600 text-white shadow-sm">
+        1. 완공 전경
+      </button>
+      <button onclick="loadViewer('mvtainer_fps_walkthrough.html', this)" class="nav-btn px-3 py-1.5 rounded font-medium transition-all text-slate-400 hover:text-white">
+        2. 실내 1인칭 워크스루 (Three.js)
+      </button>
+      <button onclick="loadViewer('mvtainer_3d_viewer.html', this)" class="nav-btn px-3 py-1.5 rounded font-medium transition-all text-slate-400 hover:text-white">
+        3. 3D 조감도
+      </button>
+      <button onclick="loadViewer('mvtainer_architecture.html', this)" class="nav-btn px-3 py-1.5 rounded font-medium transition-all text-slate-400 hover:text-white">
+        4. 평면도·창호도
+      </button>
+      <button onclick="loadViewer('jeonju_land_map.html', this)" class="nav-btn px-3 py-1.5 rounded font-medium transition-all text-slate-400 hover:text-white">
+        5. 토지 후보지 지도
+      </button>
+      <button onclick="loadViewer('breezeway_alternative1_preview.html', this)" class="nav-btn px-3 py-1.5 rounded font-medium transition-all text-slate-400 hover:text-white">
+        6. 단열통로 대안1 상세
+      </button>
+    </nav>
+  </header>
+
+  <!-- Main Iframe Display Container -->
+  <main class="flex-1 w-full bg-[#070d19] relative">
+    <iframe id="viewerFrame" src="gui_site_completion_viewer.html" class="w-full h-full border-0"></iframe>
+  </main>
+
+  <script>
+    function loadViewer(filename, btn) {
+      document.getElementById('viewerFrame').src = filename;
+      document.querySelectorAll('.nav-btn').forEach(b => {
+        b.className = "nav-btn px-3 py-1.5 rounded font-medium transition-all text-slate-400 hover:text-white";
+      });
+      btn.className = "nav-btn px-3 py-1.5 rounded font-medium transition-all bg-blue-600 text-white shadow-sm";
+    }
+  </script>
+</body>
+</html>

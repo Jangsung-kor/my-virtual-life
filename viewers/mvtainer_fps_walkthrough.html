@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>므브테이너 16.4평 1인칭 실내 3D 워크스루 (시나리오 1: 2인 최적화)</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <!-- Three.js & PointerLockControls CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/PointerLockControls.js"></script>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background-color: #050b14;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      user-select: none;
+    }
+    #canvas-container {
+      width: 100vw;
+      height: 100vh;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+    #reticle {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 6px;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.7);
+      border-radius: 50%;
+      pointer-events: none;
+      box-shadow: 0 0 4px rgba(0,0,0,0.8);
+      z-index: 10;
+    }
+    /* Minimap Radar */
+    #minimap {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      width: 220px;
+      height: 160px;
+      background: rgba(13, 24, 41, 0.85);
+      border: 1.5px solid #1e3250;
+      border-radius: 10px;
+      backdrop-filter: blur(8px);
+      z-index: 20;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+    }
+  </style>
+</head>
+<body>
+  <!-- 3D WebGL Canvas Container -->
+  <div id="canvas-container"></div>
+  <div id="reticle"></div>
+
+  <!-- Top UI Header Bar -->
+  <div class="absolute top-4 left-4 right-4 z-20 flex flex-wrap justify-between items-center gap-3 pointer-events-none">
+    <div class="bg-[#0d1829]/90 border border-[#1e3250] rounded-xl px-4 py-2.5 backdrop-blur shadow-lg pointer-events-auto">
+      <div class="flex items-center gap-2">
+        <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-700/50">60FPS 최적화 완료</span>
+        <h1 class="text-sm font-bold text-white">므브테이너 16.4평 실내 워크스루</h1>
+        <span class="text-xs text-slate-400 font-mono">| 2인 최적화 시나리오 1</span>
+      </div>
+      <p class="text-[11px] text-slate-400 mt-0.5">화면을 클릭하여 1인칭 시점으로 진입하세요. (W/A/S/D 이동, 마우스 회전, ESC 해제)</p>
+    </div>
+
+    <!-- Quick Teleport Pills -->
+    <div class="flex flex-wrap items-center gap-1.5 bg-[#0d1829]/90 border border-[#1e3250] p-1.5 rounded-xl backdrop-blur pointer-events-auto">
+      <button onclick="teleportTo('living')" class="px-2.5 py-1 rounded text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-colors">
+        거실 & 아일랜드
+      </button>
+      <button onclick="teleportTo('entry')" class="px-2.5 py-1 rounded text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-colors">
+        현관 클린전실
+      </button>
+      <button onclick="teleportTo('breezeway')" class="px-2.5 py-1 rounded text-xs font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">
+        단열 통로 (W7)
+      </button>
+      <button onclick="teleportTo('bedroom')" class="px-2.5 py-1 rounded text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-colors">
+        마스터 침실
+      </button>
+      <button onclick="teleportTo('studio')" class="px-2.5 py-1 rounded text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-colors">
+        개발실 & 드레스룸
+      </button>
+      <button onclick="teleportTo('bathroom')" class="px-2.5 py-1 rounded text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-colors">
+        3분리 욕실
+      </button>
+    </div>
+  </div>
+
+  <!-- Instruction Block Overlay (Shown when pointer is unlocked) -->
+  <div id="blocker" class="absolute inset-0 z-30 bg-black/60 backdrop-blur-sm flex items-center justify-center cursor-pointer">
+    <div class="bg-[#0d1829] border border-[#1e3250] rounded-2xl p-7 max-w-md text-center shadow-2xl">
+      <div class="w-12 h-12 rounded-full bg-blue-600/20 text-blue-400 border border-blue-500/40 mx-auto flex items-center justify-center mb-4 text-xl font-bold">
+        3D
+      </div>
+      <h2 class="text-lg font-bold text-white mb-2">실내 1인칭 워크스루 시작</h2>
+      <p class="text-xs text-slate-300 mb-5 leading-relaxed">
+        화면을 클릭하면 마우스가 잠기며 실제 1.6m 눈높이에서 자유롭게 걸어 다닐 수 있습니다.
+      </p>
+      <div class="grid grid-cols-2 gap-2 text-left text-xs bg-slate-950/80 p-3.5 rounded-xl border border-slate-800 mb-5 font-mono">
+        <div class="text-slate-400">이동: <span class="text-blue-400 font-bold">W / A / S / D</span></div>
+        <div class="text-slate-400">시선 회전: <span class="text-blue-400 font-bold">마우스 이동</span></div>
+        <div class="text-slate-400">시선 높이: <span class="text-emerald-400 font-bold">1.60m (고정)</span></div>
+        <div class="text-slate-400">잠금 해제: <span class="text-amber-400 font-bold">ESC</span></div>
+      </div>
+      <button class="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs transition-colors shadow-md">
+        클릭하여 실내로 들어가기
+      </button>
+    </div>
+  </div>
+
+  <!-- Bottom Left Room Status HUD -->
+  <div class="absolute bottom-5 left-5 z-20 bg-[#0d1829]/90 border border-[#1e3250] rounded-xl px-4 py-3 backdrop-blur shadow-lg max-w-sm pointer-events-none">
+    <div class="flex items-center gap-2 mb-1">
+      <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+      <span id="currentRoomTitle" class="text-xs font-bold text-white">LDK 거실 & 1,800mm 아일랜드</span>
+    </div>
+    <p id="currentRoomDesc" class="text-[11px] text-slate-400 leading-relaxed">
+      2인 대면식 아일랜드 식탁과 패브릭 소파, 75인치 TV가 배치된 메인 거주 공간입니다.
+    </p>
+  </div>
+
+  <!-- Bottom Right 2D Minimap Canvas -->
+  <canvas id="minimap" width="220" height="160"></canvas>
+
+  <script>
+    /* ==========================================================================
+       THREE.JS PERFORMANCE-OPTIMIZED ARCHITECTURAL ENGINE (SCENARIO 1)
+       ========================================================================== */
+    const container = document.getElementById('canvas-container');
+    const blocker = document.getElementById('blocker');
+    const currentRoomTitle = document.getElementById('currentRoomTitle');
+    const currentRoomDesc = document.getElementById('currentRoomDesc');
+    const minimapCanvas = document.getElementById('minimap');
+    const minimapCtx = minimapCanvas.getContext('2d');
+
+    // 1. Scene, Camera, Renderer Setup
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x060c18);
+    scene.fog = new THREE.FogExp2(0x060c18, 0.035);
+
+    const camera = new THREE.PerspectiveCamera(72, window.innerWidth / window.innerHeight, 0.1, 80);
+    camera.position.set(2.0, 1.6, -1.8); // Start in Living Room
+
+    const renderer = new THREE.WebGLRenderer({ 
+      antialias: true, 
+      powerPreference: "high-performance",
+      precision: "mediump"
+    });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    // DPR optimization: cap at 1.5 to reduce fill-rate pressure on high-DPI displays
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFShadowMap; // Lightweight PCF filter
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.05;
+    container.appendChild(renderer.domElement);
+
+    // 2. Controls & Movement States
+    const controls = new THREE.PointerLockControls(camera, document.body);
+    let moveForward = false;
+    let moveBackward = false;
+    let moveLeft = false;
+    let moveRight = false;
+    const velocity = new THREE.Vector3();
+    const direction = new THREE.Vector3();
+    let prevTime = performance.now();
+    let lastMinimapTime = 0; // Throttling tracker for 2D minimap
+
+    blocker.addEventListener('click', () => { controls.lock(); });
+    controls.addEventListener('lock', () => { blocker.style.display = 'none'; });
+    controls.addEventListener('unlock', () => { blocker.style.display = 'flex'; });
+
+    document.addEventListener('keydown', (e) => {
+      switch (e.code) {
+        case 'KeyW': case 'ArrowUp': moveForward = true; break;
+        case 'KeyA': case 'ArrowLeft': moveLeft = true; break;
+        case 'KeyS': case 'ArrowDown': moveBackward = true; break;
+        case 'KeyD': case 'ArrowRight': moveRight = true; break;
+      }
+    });
+
+    document.addEventListener('keyup', (e) => {
+      switch (e.code) {
+        case 'KeyW': case 'ArrowUp': moveForward = false; break;
+        case 'KeyA': case 'ArrowLeft': moveLeft = false; break;
+        case 'KeyS': case 'ArrowDown': moveBackward = false; break;
+        case 'KeyD': case 'ArrowRight': moveRight = false; break;
+      }
+    });
+
+    // 3. Dynamic Texture Generation (100% CORS-Free, Zero External Assets)
+    function createWoodTexture() {
+      const c = document.createElement('canvas');
+      c.width = 256; c.height = 256;
+      const ctx = c.getContext('2d');
+      ctx.fillStyle = '#854d0e'; ctx.fillRect(0, 0, 256, 256);
+      ctx.fillStyle = '#713f12';
+      for (let i = 0; i < 256; i += 32) {
+        ctx.fillRect(i, 0, 2, 256);
+        for (let j = 0; j < 256; j += 64) {
+          ctx.fillStyle = (i + j) % 64 === 0 ? '#9a3412' : '#78350f';
+          ctx.fillRect(i, j, 30, 62);
+        }
+      }
+      return new THREE.CanvasTexture(c);
+    }
+
+    function createTileTexture() {
+      const c = document.createElement('canvas');
+      c.width = 128; c.height = 128;
+      const ctx = c.getContext('2d');
+      ctx.fillStyle = '#334155'; ctx.fillRect(0, 0, 128, 128);
+      ctx.strokeStyle = '#475569'; ctx.lineWidth = 3;
+      ctx.strokeRect(0, 0, 64, 64);
+      ctx.strokeRect(64, 0, 64, 64);
+      ctx.strokeRect(0, 64, 64, 64);
+      ctx.strokeRect(64, 64, 64, 64);
+      return new THREE.CanvasTexture(c);
+    }
+
+    function createDeckTexture() {
+      const c = document.createElement('canvas');
+      c.width = 128; c.height = 128;
+      const ctx = c.getContext('2d');
+      ctx.fillStyle = '#b45309'; ctx.fillRect(0, 0, 128, 128);
+      ctx.fillStyle = '#92400e';
+      for (let i = 0; i < 128; i += 16) { ctx.fillRect(i, 0, 2, 128); }
+      return new THREE.CanvasTexture(c);
+    }
+
+    function createMonitorScreenTexture() {
+      const c = document.createElement('canvas');
+      c.width = 256; c.height = 128;
+      const ctx = c.getContext('2d');
+      ctx.fillStyle = '#0f172a'; ctx.fillRect(0, 0, 256, 128);
+      ctx.font = '11px monospace';
+      ctx.fillStyle = '#64748b'; ctx.fillText("// MVTAINER ARCHITECTURE v2.0", 10, 20);
+      ctx.fillStyle = '#38bdf8'; ctx.fillText("const WingA = new LivingModule(1800);", 10, 42);
+      ctx.fillStyle = '#a855f7'; ctx.fillText("const WingB = new DevModule(1500);", 10, 64);
+      ctx.fillStyle = '#10b981'; ctx.fillText("export default { fps: 60, pass: 1 };", 10, 86);
+      return new THREE.CanvasTexture(c);
+    }
+
+    const texWood = createWoodTexture(); texWood.wrapS = texWood.wrapT = THREE.RepeatWrapping; texWood.repeat.set(6, 3);
+    const texTile = createTileTexture(); texTile.wrapS = texTile.wrapT = THREE.RepeatWrapping; texTile.repeat.set(4, 4);
+    const texDeck = createDeckTexture(); texDeck.wrapS = texDeck.wrapT = THREE.RepeatWrapping; texDeck.repeat.set(8, 2);
+    const texScreen = createMonitorScreenTexture();
+
+    // 4. Lightweight Standard Materials (Zero transmission overhead)
+    const matWall = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.85, metalness: 0.05 });
+    const matExtSteel = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.6, metalness: 0.4 });
+    const matCeiling = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.9 });
+    const matWoodFloor = new THREE.MeshStandardMaterial({ map: texWood, roughness: 0.4, metalness: 0.1 });
+    const matTileFloor = new THREE.MeshStandardMaterial({ map: texTile, roughness: 0.3, metalness: 0.1 });
+    const matDeck = new THREE.MeshStandardMaterial({ map: texDeck, roughness: 0.6 });
+    // Optimized transparent standard material instead of heavy MeshPhysicalMaterial
+    const matGlass = new THREE.MeshStandardMaterial({ color: 0xa5f3fc, transparent: true, opacity: 0.35, roughness: 0.1, metalness: 0.1 });
+    const matAisleOak = new THREE.MeshStandardMaterial({ color: 0xb45309, roughness: 0.4 });
+    const matSofa = new THREE.MeshStandardMaterial({ color: 0x2563eb, roughness: 0.9 });
+    const matSoundproofWall = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.7 });
+
+    // 5. Environmental Lighting (Optimized: 1 Directional Shadow + No PointLight Shadows)
+    const ambLight = new THREE.AmbientLight(0xdbeafe, 0.45);
+    scene.add(ambLight);
+
+    // Sole Shadow-Casting Light: Natural Sunlight through South Patio Glass (1024x1024)
+    const sunLight = new THREE.DirectionalLight(0xfffaed, 1.25);
+    sunLight.position.set(4, 7, -5);
+    sunLight.castShadow = true;
+    sunLight.shadow.mapSize.width = 1024;
+    sunLight.shadow.mapSize.height = 1024;
+    sunLight.shadow.camera.near = 0.5;
+    sunLight.shadow.camera.far = 20;
+    sunLight.shadow.camera.left = -5.5;
+    sunLight.shadow.camera.right = 5.5;
+    sunLight.shadow.camera.top = 5.5;
+    sunLight.shadow.camera.bottom = -5.5;
+    sunLight.shadow.bias = -0.0008;
+    scene.add(sunLight);
+
+    // Warm Interior Spot / Point Lights (castShadow = false for zero cube-map overhead!)
+    function addDownlight(x, y, z, color = 0xffecd2, intensity = 1.3, dist = 5.5) {
+      const p = new THREE.PointLight(color, intensity, dist);
+      p.position.set(x, y, z);
+      p.castShadow = false; // Zero shadow pass overhead!
+      scene.add(p);
+
+      // Light fixture mesh on ceiling
+      const fixture = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.08, 0.08, 0.02, 12),
+        new THREE.MeshBasicMaterial({ color: 0xffffff })
+      );
+      fixture.position.set(x, 2.39, z);
+      scene.add(fixture);
+      return p;
+    }
+
+    addDownlight(2.0, 2.3, -1.8, 0xffecd2, 1.4); // Living room center
+    addDownlight(-0.5, 2.3, -1.8, 0xffe4b5, 1.5); // Island dining
+    addDownlight(-3.3, 2.3, -1.8, 0xdbeafe, 1.0); // Entryway vestibule
+    addDownlight(2.8, 2.3, 0.0, 0xbae6fd, 0.8, 3.5); // Breezeway
+    addDownlight(-2.8, 2.3, 1.8, 0xffe8d6, 1.2); // Master bedroom
+    addDownlight(0.2, 2.3, 1.8, 0x60a5fa, 1.6); // Dev workspace
+    addDownlight(3.2, 2.3, 1.8, 0xffffff, 1.3); // 3-way bathroom powder
+
+    // 6. Architectural Geometry Assembly
+    function createBox(w, h, d, x, y, z, mat, castShadow = true, receiveShadow = true) {
+      const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
+      mesh.position.set(x, y, z);
+      mesh.castShadow = castShadow;
+      mesh.receiveShadow = receiveShadow;
+      scene.add(mesh);
+      return mesh;
+    }
+
+    // Floors
+    createBox(8.8, 0.1, 2.7, 0, -0.05, -1.8, matWoodFloor, false, true); // Wing A Main Floor
+    createBox(1.8, 0.12, 2.7, -3.5, -0.04, -1.8, matTileFloor, false, true); // Wing A Entry Tile
+    createBox(8.8, 0.1, 2.7, 0, -0.05, 1.8, matWoodFloor, false, true); // Wing B Main Floor
+    createBox(2.6, 0.12, 2.7, 3.1, -0.04, 1.8, matTileFloor, false, true); // Wing B Bathroom Tile
+    createBox(1.6, 0.1, 0.9, 2.8, -0.05, 0, matWoodFloor, false, true); // Breezeway Floor
+    createBox(5.0, 0.15, 0.9, -0.5, -0.075, 0, matDeck, false, true); // Courtyard Deck
+
+    // Ceilings
+    createBox(8.8, 0.1, 2.7, 0, 2.45, -1.8, matCeiling, false, false);
+    createBox(8.8, 0.1, 2.7, 0, 2.45, 1.8, matCeiling, false, false);
+    createBox(1.6, 0.1, 0.9, 2.8, 2.45, 0, matCeiling, false, false);
+
+    // Exterior Shell Walls
+    // Wing A Outer Walls
+    createBox(8.8, 2.4, 0.15, 0, 1.2, -3.225, matWall); // North Wall
+    createBox(0.15, 2.4, 2.7, -4.475, 1.2, -1.8, matWall); // West End Wall
+    createBox(0.15, 2.4, 2.7, 4.475, 1.2, -1.8, matWall); // East End Wall
+    // Wing A South Wall (with opening for Breezeway and Patio Glass)
+    createBox(3.0, 2.4, 0.15, -3.0, 1.2, -0.375, matWall);
+    createBox(0.8, 2.4, 0.15, 4.0, 1.2, -0.375, matWall);
+    createBox(3.0, 2.2, 0.05, 1.0, 1.1, -0.375, matGlass, false, false); // 3m South Patio Slider W2/D3
+
+    // Wing B Outer Walls
+    createBox(8.8, 2.4, 0.15, 0, 1.2, 3.225, matWall); // South Wall
+    createBox(0.15, 2.4, 2.7, -4.475, 1.2, 1.8, matWall); // West End Wall
+    createBox(0.15, 2.4, 2.7, 4.475, 1.2, 1.8, matWall); // East End Wall
+    createBox(6.4, 2.4, 0.15, -1.3, 1.2, 0.375, matWall);
+    createBox(0.8, 2.4, 0.15, 4.0, 1.2, 0.375, matWall);
+
+    // Insulated Breezeway Walls (150mm Urethane + W7 Window)
+    createBox(0.15, 2.4, 0.9, 3.675, 1.2, 0, matWall); // East solid wall
+    createBox(0.15, 0.8, 0.9, 1.925, 0.4, 0, matWall); // West Lower wall
+    createBox(0.15, 0.6, 0.9, 1.925, 2.1, 0, matWall); // West Upper wall
+    createBox(0.05, 1.0, 0.9, 1.925, 1.3, 0, matGlass, false, false); // W7 Window Pane
+
+    // ================= WING A INTERIOR FURNITURE =================
+    // 1. Entry Clean Vestibule (X: -4.4 to -2.6)
+    createBox(0.5, 2.2, 1.8, -4.1, 1.1, -2.2, new THREE.MeshStandardMaterial({ color: 0x475569 }));
+    createBox(0.1, 1.1, 0.3, -3.7, 1.3, -3.05, new THREE.MeshStandardMaterial({ color: 0x059669 }));
+    createBox(0.6, 0.6, 0.05, -3.7, 1.7, -3.05, new THREE.MeshStandardMaterial({ color: 0x0f172a }));
+    createBox(0.6, 0.6, 0.05, -3.7, 0.9, -3.05, new THREE.MeshStandardMaterial({ color: 0x0f172a }));
+
+    // 2. Kitchen & 1,800mm Island Dining Bar (X: -2.6 to +0.5)
+    createBox(2.2, 0.85, 0.65, -1.4, 0.425, -2.8, new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.3 }));
+    createBox(2.2, 0.65, 0.35, -1.4, 1.9, -2.95, new THREE.MeshStandardMaterial({ color: 0x334155 }));
+    // 1,800mm x 800mm Island Dining Counter (Scenario 1 Key Anchor)
+    createBox(1.8, 0.85, 0.8, -0.6, 0.425, -1.6, matAisleOak, true, true);
+    // 2 Bar Stools
+    createBox(0.35, 0.65, 0.35, -1.0, 0.325, -0.9, new THREE.MeshStandardMaterial({ color: 0x1e293b }));
+    createBox(0.35, 0.65, 0.35, -0.2, 0.325, -0.9, new THREE.MeshStandardMaterial({ color: 0x1e293b }));
+
+    // 3. Living Room (X: +0.5 to +4.4)
+    createBox(2.1, 0.75, 0.95, 2.5, 0.375, -2.5, matSofa, true, true);
+    createBox(2.1, 0.45, 0.25, 2.5, 0.75, -3.0, matSofa, true, true);
+    createBox(1.0, 0.35, 0.5, 2.5, 0.175, -1.6, new THREE.MeshStandardMaterial({ color: 0x78350f }), true, true);
+    createBox(0.08, 0.95, 1.7, 4.38, 1.35, -1.8, new THREE.MeshBasicMaterial({ color: 0x0284c7 }));
+    createBox(0.04, 0.91, 1.66, 4.35, 1.35, -1.8, new THREE.MeshBasicMaterial({ color: 0x0f172a }));
+
+    // ================= WING B INTERIOR FURNITURE =================
+    // 1. Master Bedroom (X: -4.4 to -1.4)
+    createBox(1.6, 0.45, 2.05, -2.9, 0.225, 1.8, new THREE.MeshStandardMaterial({ color: 0xf1f5f9 }));
+    createBox(1.5, 0.15, 1.4, -2.9, 0.48, 1.95, new THREE.MeshStandardMaterial({ color: 0x0284c7 }));
+    createBox(0.6, 0.12, 0.4, -3.3, 0.52, 0.95, new THREE.MeshStandardMaterial({ color: 0xffffff }));
+    createBox(0.6, 0.12, 0.4, -2.5, 0.52, 0.95, new THREE.MeshStandardMaterial({ color: 0xffffff }));
+    createBox(0.4, 0.5, 0.4, -4.0, 0.25, 0.95, new THREE.MeshStandardMaterial({ color: 0x78350f }));
+    createBox(2.6, 2.2, 0.6, -2.9, 1.1, 2.85, new THREE.MeshStandardMaterial({ color: 0x334155 }));
+
+    // Soundproof Stud Wall (2P Gypsum + 50K Glasswool between Bedroom & Dev Studio)
+    createBox(0.08, 2.4, 2.7, -1.4, 1.2, 1.8, matSoundproofWall);
+
+    // 2. Developer Studio & Sub Dressroom (X: -1.4 to +1.8)
+    createBox(1.5, 0.74, 0.8, -0.4, 0.37, 2.7, new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.3 }));
+    const mon1 = createBox(0.65, 0.38, 0.05, -0.68, 0.98, 2.9, new THREE.MeshStandardMaterial({ map: texScreen, emissive: 0x0284c7, emissiveIntensity: 0.4 }));
+    mon1.rotation.y = 0.15;
+    const mon2 = createBox(0.65, 0.38, 0.05, 0.0, 0.98, 2.9, new THREE.MeshStandardMaterial({ map: texScreen, emissive: 0x0284c7, emissiveIntensity: 0.4 }));
+    mon2.rotation.y = -0.15;
+    createBox(0.55, 0.5, 0.55, -0.4, 0.45, 2.0, new THREE.MeshStandardMaterial({ color: 0x475569 }));
+    createBox(0.5, 0.6, 0.1, -0.4, 0.85, 1.75, new THREE.MeshStandardMaterial({ color: 0x334155 }));
+    createBox(0.85, 2.1, 0.55, 1.1, 1.05, 2.85, new THREE.MeshStandardMaterial({ color: 0x334155 }));
+    createBox(0.55, 1.9, 0.6, 1.8, 0.95, 2.85, new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.2 }));
+
+    // 3. 3-Way Split Hotel Bathroom (X: +1.8 to +4.4)
+    createBox(0.08, 2.4, 1.4, 2.1, 1.2, 1.1, matSoundproofWall);
+    createBox(1.2, 2.4, 0.08, 3.2, 1.2, 1.8, matSoundproofWall);
+    createBox(1.2, 0.85, 0.55, 3.2, 0.425, 0.75, new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.2 }));
+    createBox(1.1, 0.8, 0.04, 3.2, 1.45, 0.5, new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.1, metalness: 0.8 }));
+    createBox(0.4, 0.42, 0.6, 2.7, 0.21, 2.4, new THREE.MeshStandardMaterial({ color: 0xffffff }));
+    createBox(1.1, 2.0, 0.04, 3.8, 1.0, 1.8, matGlass, false, false);
+    createBox(0.7, 1.9, 0.75, 4.05, 0.95, 2.75, new THREE.MeshStandardMaterial({ color: 0x1e1e2e, roughness: 0.3 }));
+
+    // 7. Teleport Functionality
+    const ROOM_TELEPORTS = {
+      living: { x: 2.0, y: 1.6, z: -1.8, title: "LDK 거실 & 1,800mm 대면식 아일랜드", desc: "2인 대면식 아일랜드 식탁과 패브릭 소파, 75인치 TV가 배치된 공용 생활 공간입니다." },
+      entry: { x: -3.4, y: 1.6, z: -1.8, title: "현관 & 클린 전실 (벽걸이 자전거)", desc: "정비대는 외부로 이전하고 수납장과 벽걸이 로드바이크로 정리된 깔끔한 현관입니다." },
+      breezeway: { x: 2.8, y: 1.6, z: 0.0, title: "단열 연결통로 (150mm 우레탄벽 + W7 창)", desc: "유리 온실을 없애고 150mm 우레탄 단열패널과 W7 틸트 환기창으로 결로를 차단한 통로입니다." },
+      bedroom: { x: -2.8, y: 1.6, z: 1.8, title: "마스터 침실 (퀸베드 하부 4구 서랍)", desc: "1,500×2,000mm 퀸 침대 하부 400L 서랍 수납과 작업실 차음벽으로 안락한 침실입니다." },
+      studio: { x: -0.4, y: 1.6, z: 2.0, title: "독립 개발 작업실 & 서브 드레스룸", desc: "1,500mm 코딩 데스크(듀얼 모니터)와 에어드레서/시스템 행거가 완비된 개발 공간입니다." },
+      bathroom: { x: 3.2, y: 1.6, z: 1.0, title: "3분리 독립 호텔식 욕실 & 파우더룸", desc: "독립 양변기, 독립 샤워실, 1,200mm 복도식 더블 파우더 카운터로 동시 출근이 가능합니다." }
+    };
+
+    window.teleportTo = function(key) {
+      const target = ROOM_TELEPORTS[key];
+      if (!target) return;
+      camera.position.set(target.x, target.y, target.z);
+      currentRoomTitle.innerText = target.title;
+      currentRoomDesc.innerText = target.desc;
+    };
+
+    // 8. Throttled 2D Minimap Rendering (Runs at ~10-12 FPS to save CPU)
+    function drawMinimap() {
+      minimapCtx.clearRect(0, 0, 220, 160);
+      minimapCtx.fillStyle = '#0f172a';
+      minimapCtx.fillRect(0, 0, 220, 160);
+
+      const originX = 110;
+      const originY = 80;
+      const scale = 17;
+
+      function toMapX(worldX) { return originX + worldX * scale; }
+      function toMapY(worldZ) { return originY + worldZ * scale; }
+
+      // Container Outlines
+      minimapCtx.strokeStyle = '#38bdf8';
+      minimapCtx.lineWidth = 1.5;
+      minimapCtx.strokeRect(toMapX(-4.4), toMapY(-3.15), 8.8 * scale, 2.7 * scale);
+      minimapCtx.fillStyle = 'rgba(56, 189, 248, 0.08)';
+      minimapCtx.fillRect(toMapX(-4.4), toMapY(-3.15), 8.8 * scale, 2.7 * scale);
+
+      minimapCtx.strokeStyle = '#818cf8';
+      minimapCtx.strokeRect(toMapX(-4.4), toMapY(0.45), 8.8 * scale, 2.7 * scale);
+      minimapCtx.fillStyle = 'rgba(129, 140, 248, 0.08)';
+      minimapCtx.fillRect(toMapX(-4.4), toMapY(0.45), 8.8 * scale, 2.7 * scale);
+
+      // Breezeway
+      minimapCtx.strokeStyle = '#34d399';
+      minimapCtx.strokeRect(toMapX(2.0), toMapY(-0.45), 1.6 * scale, 0.9 * scale);
+
+      // Room Labels
+      minimapCtx.fillStyle = '#94a3b8';
+      minimapCtx.font = '9px sans-serif';
+      minimapCtx.fillText("현관", toMapX(-3.8), toMapY(-1.7));
+      minimapCtx.fillText("주방/식탁", toMapX(-1.5), toMapY(-1.7));
+      minimapCtx.fillText("LDK 거실", toMapX(1.8), toMapY(-1.7));
+      minimapCtx.fillText("침실", toMapX(-3.3), toMapY(1.9));
+      minimapCtx.fillText("개발실", toMapX(-0.5), toMapY(1.9));
+      minimapCtx.fillText("3분리욕실", toMapX(2.4), toMapY(1.9));
+
+      // Player Vision Cone & Marker
+      const px = toMapX(camera.position.x);
+      const py = toMapY(camera.position.z);
+
+      const dir = new THREE.Vector3();
+      camera.getWorldDirection(dir);
+      const yaw = Math.atan2(dir.z, dir.x);
+
+      minimapCtx.beginPath();
+      minimapCtx.moveTo(px, py);
+      minimapCtx.arc(px, py, 22, yaw - 0.5, yaw + 0.5);
+      minimapCtx.closePath();
+      minimapCtx.fillStyle = 'rgba(56, 189, 248, 0.35)';
+      minimapCtx.fill();
+
+      minimapCtx.beginPath();
+      minimapCtx.arc(px, py, 3.5, 0, Math.PI * 2);
+      minimapCtx.fillStyle = '#38bdf8';
+      minimapCtx.fill();
+      minimapCtx.strokeStyle = '#ffffff';
+      minimapCtx.lineWidth = 1;
+      minimapCtx.stroke();
+    }
+
+    // 9. Location Detection for HUD
+    function updateCurrentRoomHUD() {
+      const x = camera.position.x;
+      const z = camera.position.z;
+
+      if (z < -0.45) { // Wing A
+        if (x < -2.5) {
+          currentRoomTitle.innerText = ROOM_TELEPORTS.entry.title;
+          currentRoomDesc.innerText = ROOM_TELEPORTS.entry.desc;
+        } else if (x < 0.8) {
+          currentRoomTitle.innerText = "주방 & 1,800mm 대면식 아일랜드 식탁";
+          currentRoomDesc.innerText = "2인이 마주보고 식사하는 1,800mm 아일랜드와 인덕션 카운터입니다.";
+        } else {
+          currentRoomTitle.innerText = ROOM_TELEPORTS.living.title;
+          currentRoomDesc.innerText = ROOM_TELEPORTS.living.desc;
+        }
+      } else if (z > 0.45) { // Wing B
+        if (x < -1.4) {
+          currentRoomTitle.innerText = ROOM_TELEPORTS.bedroom.title;
+          currentRoomDesc.innerText = ROOM_TELEPORTS.bedroom.desc;
+        } else if (x < 1.8) {
+          currentRoomTitle.innerText = ROOM_TELEPORTS.studio.title;
+          currentRoomDesc.innerText = ROOM_TELEPORTS.studio.desc;
+        } else {
+          currentRoomTitle.innerText = ROOM_TELEPORTS.bathroom.title;
+          currentRoomDesc.innerText = ROOM_TELEPORTS.bathroom.desc;
+        }
+      } else { // Breezeway
+        currentRoomTitle.innerText = ROOM_TELEPORTS.breezeway.title;
+        currentRoomDesc.innerText = ROOM_TELEPORTS.breezeway.desc;
+      }
+    }
+
+    // 10. High-Performance Animation Loop
+    function animate() {
+      requestAnimationFrame(animate);
+
+      const time = performance.now();
+      const delta = (time - prevTime) / 1000;
+
+      if (controls.isLocked) {
+        velocity.x -= velocity.x * 10.0 * delta;
+        velocity.z -= velocity.z * 10.0 * delta;
+
+        direction.z = Number(moveForward) - Number(moveBackward);
+        direction.x = Number(moveRight) - Number(moveLeft);
+        direction.normalize();
+
+        const speed = 28.0;
+        if (moveForward || moveBackward) velocity.z -= direction.z * speed * delta;
+        if (moveLeft || moveRight) velocity.x -= direction.x * speed * delta;
+
+        controls.moveRight(-velocity.x * delta);
+        controls.moveForward(-velocity.z * delta);
+
+        // Keep Eye-Level strictly fixed at 1.6m
+        camera.position.y = 1.6;
+
+        // Container Boundary Clamping
+        if (camera.position.z <= -0.45) {
+          camera.position.x = Math.max(-4.2, Math.min(4.2, camera.position.x));
+          camera.position.z = Math.max(-3.0, Math.min(-0.6, camera.position.z));
+        } else if (camera.position.z >= 0.45) {
+          camera.position.x = Math.max(-4.2, Math.min(4.2, camera.position.x));
+          camera.position.z = Math.max(0.6, Math.min(3.0, camera.position.z));
+        } else {
+          camera.position.x = Math.max(2.1, Math.min(3.5, camera.position.x));
+          camera.position.z = Math.max(-0.6, Math.min(0.6, camera.position.z));
+        }
+
+        updateCurrentRoomHUD();
+      }
+
+      // Throttle minimap updates to ~12 FPS (every 85ms)
+      if (time - lastMinimapTime > 85) {
+        drawMinimap();
+        lastMinimapTime = time;
+      }
+
+      renderer.render(scene, camera);
+      prevTime = time;
+    }
+
+    animate();
+
+    // Window Resize Handling
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+</body>
+</html>

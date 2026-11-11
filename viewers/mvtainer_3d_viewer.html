@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>므브테이너 16.4평 3D 공간 뷰어 (시나리오 1: 2인 최적화)</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    :root {
+      --background: #091221;
+      --card: #0d1829;
+      --border: #1e3250;
+      --foreground: #f1f5f9;
+      --muted-foreground: #94a3b8;
+      --primary: #38bdf8;
+    }
+    #viewport-3d {
+      perspective: 950px;
+      perspective-origin: 50% 50%;
+      user-select: none;
+      touch-action: none;
+    }
+    .scene-3d {
+      transform-style: preserve-3d;
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .face-3d {
+      position: absolute;
+      transform-style: preserve-3d;
+      backface-visibility: visible;
+      box-sizing: border-box;
+    }
+    .wood-floor {
+      background: repeating-linear-gradient(90deg, #78350f, #78350f 16px, #92400e 16px, #92400e 32px);
+      box-shadow: inset 0 0 40px rgba(0,0,0,0.5);
+    }
+    .tile-floor {
+      background: repeating-linear-gradient(0deg, #334155, #334155 24px, #475569 24px, #475569 25px),
+                  repeating-linear-gradient(90deg, #334155, #334155 24px, #475569 24px, #475569 25px);
+    }
+    .deck-floor {
+      background: repeating-linear-gradient(90deg, #b45309, #b45309 12px, #d97706 12px, #d97706 24px);
+    }
+    .glass-wall {
+      background: rgba(56, 189, 248, 0.18);
+      border: 1px solid rgba(56, 189, 248, 0.6);
+      backdrop-filter: blur(1.5px);
+    }
+    .insulated-wall {
+      background: #1e293b;
+      border: 1.5px solid #475569;
+    }
+    .steel-ribs {
+      background: repeating-linear-gradient(90deg, #1e293b, #1e293b 8px, #0f172a 8px, #0f172a 16px);
+      border: 1px solid #334155;
+      transition: opacity 0.3s ease;
+    }
+    .soundproof-wall {
+      background: repeating-linear-gradient(45deg, #475569, #475569 6px, #64748b 6px, #64748b 12px);
+      border: 2px solid #94a3b8;
+    }
+    .monitor-glow {
+      box-shadow: 0 0 15px rgba(59, 130, 246, 0.85);
+    }
+    .exterior-shell {
+      transition: opacity 0.3s ease;
+    }
+    .exterior-shell.hidden-in-eye {
+      opacity: 0.05 !important;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body class="bg-[#070d19] text-slate-100 antialiased p-3 font-sans">
+  <div class="bg-[var(--card)] text-[var(--foreground)] border border-[var(--border)] rounded-xl p-5 shadow-sm max-w-4xl mx-auto">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-4 mb-4 border-b border-[var(--border)] gap-3">
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300">시나리오 1: 2인 최적화</span>
+          <h2 class="text-[var(--foreground)] font-bold text-lg">므브테이너 16.4평 내부 인터랙티브 3D 투어</h2>
+        </div>
+        <p id="viewModeHint" class="text-[var(--muted-foreground)] text-xs mt-0.5">
+          조감도 모드: 외부 상공에서 전체 공간을 내려다봅니다.
+        </p>
+      </div>
+
+      <!-- Controls -->
+      <div class="flex flex-wrap items-center gap-2">
+        <!-- View Mode Switch -->
+        <div class="inline-flex rounded-lg border border-[var(--border)] p-1 bg-[var(--background)] text-xs">
+          <button id="btnIsoMode" onclick="setViewMode('iso')" class="px-3 py-1.5 rounded font-semibold transition-all bg-blue-600 text-white shadow-sm">
+            조감도 (Iso)
+          </button>
+          <button id="btnEyeMode" onclick="setViewMode('eye')" class="px-3 py-1.5 rounded font-semibold transition-all text-slate-400 hover:text-white">
+            1인칭 룸 투어 (Eye-Level)
+          </button>
+        </div>
+
+        <button onclick="resetCamera()" class="px-3 py-1.5 rounded border border-[var(--border)] bg-[var(--background)] text-xs font-medium hover:bg-[var(--card)] transition-colors">
+          시점 초기화
+        </button>
+      </div>
+    </div>
+
+    <!-- 3D Viewport Area -->
+    <div id="viewport-3d" class="relative w-full h-[490px] bg-slate-950 rounded-xl overflow-hidden border border-slate-800 flex items-center justify-center cursor-grab active:cursor-grabbing">
+      
+      <!-- Top Floating Room Selection Pills -->
+      <div class="absolute top-3 left-3 z-20 flex flex-wrap gap-1.5 max-w-[80%]">
+        <button onclick="selectRoom('all')" id="pill-all" class="px-2.5 py-1 rounded-md text-xs font-medium bg-blue-600 text-white shadow-sm transition-all">
+          전체 조감
+        </button>
+        <button onclick="selectRoom('living')" id="pill-living" class="px-2.5 py-1 rounded-md text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-all">
+          LDK 거실 & 아일랜드
+        </button>
+        <button onclick="selectRoom('bike')" id="pill-bike" class="px-2.5 py-1 rounded-md text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-all">
+          현관 클린전실
+        </button>
+        <button onclick="selectRoom('breezeway')" id="pill-breezeway" class="px-2.5 py-1 rounded-md text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-all">
+          단열 통로 (W7)
+        </button>
+        <button onclick="selectRoom('bed')" id="pill-bed" class="px-2.5 py-1 rounded-md text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-all">
+          마스터 침실 (서랍베드)
+        </button>
+        <button onclick="selectRoom('studio')" id="pill-studio" class="px-2.5 py-1 rounded-md text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-all">
+          개발실 & 서브드레스룸
+        </button>
+        <button onclick="selectRoom('bath')" id="pill-bath" class="px-2.5 py-1 rounded-md text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-all">
+          3분리 독립 욕실
+        </button>
+      </div>
+
+      <!-- Current Location & Mode Indicator Badge -->
+      <div id="modeBadge" class="absolute top-3 right-3 z-20 bg-slate-900/90 border border-blue-500/40 text-blue-400 font-mono text-[11px] px-3 py-1 rounded-md backdrop-blur shadow-sm">
+        조감 모드: 전체
+      </div>
+
+      <!-- Bottom Hint / Compass & Zoom -->
+      <div class="absolute bottom-3 right-3 z-20 flex items-center gap-3 bg-slate-900/80 backdrop-blur px-3 py-1.5 rounded-lg border border-slate-700 text-slate-300 text-xs">
+        <span class="flex items-center gap-1 font-mono text-[11px]">
+          <span id="rotDeg" class="text-blue-400">Pitch: 58° / Yaw: -38°</span>
+        </span>
+        <span class="text-slate-500">|</span>
+        <label class="flex items-center gap-1.5">
+          <span>확대</span>
+          <input type="range" id="zoomSlider" min="0.6" max="3.6" step="0.05" value="0.95" oninput="updateZoom(this.value)" class="w-20 accent-blue-500">
+        </label>
+      </div>
+
+      <!-- Instruction Overlay Banner for Eye-Level Mode -->
+      <div id="eyeNotice" class="hidden absolute bottom-3 left-3 z-20 bg-blue-950/80 border border-blue-500/50 text-blue-200 text-xs px-3 py-1.5 rounded-lg backdrop-blur flex items-center gap-2">
+        <span>방 내부 중심 1인칭 시점입니다. 마우스를 드래그하여 실내를 360도 둘러보세요.</span>
+      </div>
+
+      <!-- 3D Scene Root -->
+      <div id="scene" class="scene-3d w-0 h-0 relative">
+        <!-- 3D Content rendered by JS -->
+      </div>
+    </div>
+
+    <!-- Description & Features of Selected View -->
+    <div class="mt-4 p-3.5 rounded-lg bg-[var(--background)] border border-[var(--border)] text-xs flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+      <div>
+        <h4 id="featureTitle" class="font-bold text-[var(--foreground)] text-sm">16.4평 듀얼 연동형 (3m × 9m 2동 결합)</h4>
+        <p id="featureDesc" class="text-[var(--muted-foreground)] mt-0.5 leading-relaxed">
+          공용 생활동(LDK + 1,800mm 대면식 아일랜드)과 개인 프라이빗동(개발 데스크 + 서브 드레스룸 + 퀸베드 + 3분리 욕실)이 단열 통로로 연결된 2인 거주 최적화 구조입니다.
+        </p>
+      </div>
+      <div id="badgeDim" class="font-mono text-xs bg-[var(--card)] px-3 py-1.5 rounded border border-[var(--border)] text-[var(--foreground)] whitespace-nowrap">
+        가로 9,000mm × 세로 6,800mm (중정 데크 포함)
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // View States
+    let currentViewMode = 'iso'; // 'iso' | 'eye'
+    let currentRoom = 'all';
+
+    // Camera Transformation Parameters
+    let rotX = 58;  // Pitch
+    let rotZ = -38; // Yaw
+    let zoom = 0.95;
+    let targetX = 0;
+    let targetY = 0;
+    let targetZ = 0;
+
+    let isDragging = false;
+    let lastMouseX = 0;
+    let lastMouseY = 0;
+
+    const viewport = document.getElementById('viewport-3d');
+    const scene = document.getElementById('scene');
+    const rotDeg = document.getElementById('rotDeg');
+    const zoomSlider = document.getElementById('zoomSlider');
+    const modeBadge = document.getElementById('modeBadge');
+    const eyeNotice = document.getElementById('eyeNotice');
+    const viewModeHint = document.getElementById('viewModeHint');
+
+    // Room Coordinate Targets (World coordinates of room centers in pixels)
+    // Scale: 50px = 1,000mm
+    const ROOM_SPECS = {
+      all: {
+        iso: { targetX: 0, targetY: 0, targetZ: 0, rotX: 58, rotZ: -38, zoom: 0.95 },
+        title: "16.4평 듀얼 연동형 전체 조감도",
+        desc: "공용 생활동(LDK + 1,800mm 아일랜드)과 프라이빗동(개발실 + 침실 + 3분리욕실)이 중정 데크 및 단열 통로로 연결된 조감 뷰입니다."
+      },
+      living: {
+        iso: { targetX: 110, targetY: -90, targetZ: 15, rotX: 50, rotZ: -60, zoom: 1.45 },
+        eye: { targetX: 110, targetY: -90, targetZ: 26, rotX: 84, rotZ: -70, zoom: 3.1 },
+        title: "LDK 거실 & 1,800mm 대면식 아일랜드 식탁",
+        desc: "2인이 마주보며 식사할 수 있는 1,800mm 아일랜드 식탁과 인덕션 조리대, 2인 패브릭 소파 및 75인치 스마트 TV가 배치된 메인 휴식 공간입니다."
+      },
+      bike: {
+        iso: { targetX: -180, targetY: -90, targetZ: 15, rotX: 48, rotZ: 20, zoom: 1.6 },
+        eye: { targetX: -180, targetY: -90, targetZ: 26, rotX: 83, rotZ: 40, zoom: 3.2 },
+        title: "현관 & 클린 전실 (수납 벽면 & 벽걸이 자전거)",
+        desc: "기름과 정비대는 외부 캐비닛으로 이전하고, 공간 효율적인 벽걸이 로드바이크 거치대와 2인 신발장/전신거울로 깔끔하게 정리된 현관입니다."
+      },
+      breezeway: {
+        iso: { targetX: 190, targetY: 5, targetZ: 15, rotX: 45, rotZ: -35, zoom: 1.7 },
+        eye: { targetX: 190, targetY: 5, targetZ: 26, rotX: 84, rotZ: -10, zoom: 3.3 },
+        title: "단열 연결통로 (150mm 우레탄벽 + W7 틸트 환기창)",
+        desc: "유리 온실 구조와 외벽 도어를 완전히 없애고, 150mm 우레탄 단열패널 벽체와 서측 3중유리 W7 틸트 개폐창을 설치해 결로와 열손실을 차단했습니다."
+      },
+      bed: {
+        iso: { targetX: -150, targetY: 100, targetZ: 15, rotX: 50, rotZ: 35, zoom: 1.5 },
+        eye: { targetX: -150, targetY: 100, targetZ: 26, rotX: 83, rotZ: 30, zoom: 3.1 },
+        title: "마스터 침실 (퀸베드 하부 4구 대형 서랍 수납)",
+        desc: "1,500×2,000mm 퀸 침대 하부에 4구 슬라이딩 서랍(약 400L)을 내장하고, 북측 4도어 붙박이장과 작업실 차음벽(2P+50K)으로 안락한 수면을 보장합니다."
+      },
+      studio: {
+        iso: { targetX: 5, targetY: 100, targetZ: 15, rotX: 48, rotZ: -15, zoom: 1.5 },
+        eye: { targetX: 5, targetY: 100, targetZ: 26, rotX: 84, rotZ: -10, zoom: 3.2 },
+        title: "독립 개발 작업실 & 1,500mm 서브 드레스룸",
+        desc: "1,500mm 고밀도 코딩 데스크(듀얼 모니터 암)와 인체공학 메쉬 체어, 그리고 우측에 에어드레서와 시스템 오픈 행거를 갖춰 2인 수납을 2배로 확장했습니다."
+      },
+      bath: {
+        iso: { targetX: 155, targetY: 100, targetZ: 15, rotX: 50, rotZ: -35, zoom: 1.6 },
+        eye: { targetX: 155, targetY: 100, targetZ: 26, rotX: 84, rotZ: -45, zoom: 3.3 },
+        title: "3분리 독립 호텔식 욕실 & 파우더룸",
+        desc: "독립 양변기실(포켓도어 D7-A), 독립 샤워실(유리도어 D7-B), 복도 개방형 1,200mm 더블 파우더 세면대 및 세탁·건조 타워로 동시 출근 준비가 가능합니다."
+      }
+    };
+
+    // Mouse / Touch Rotation Interaction
+    viewport.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      lastMouseX = e.clientX;
+      lastMouseY = e.clientY;
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+      const dx = e.clientX - lastMouseX;
+      const dy = e.clientY - lastMouseY;
+
+      if (currentViewMode === 'iso') {
+        // 조감도 회전: 좌우 정방향(-dx), 상하 반전(-dy)
+        rotZ -= dx * 0.45;
+        rotX -= dy * 0.35;
+        if (rotX < 20) rotX = 20;
+        if (rotX > 85) rotX = 85;
+      } else {
+        // 1인칭 회전: 방 안에서 고개 돌리기 (Yaw 360도 자유 회전, Pitch 눈높이 틸트)
+        rotZ -= dx * 0.45;
+        rotX -= dy * 0.25;
+        // 1인칭 눈높이 피치 제한 (수평선 90° 기준 위아래 ±25°)
+        if (rotX < 65) rotX = 65;
+        if (rotX > 105) rotX = 105;
+      }
+
+      lastMouseX = e.clientX;
+      lastMouseY = e.clientY;
+
+      applyTransform();
+    });
+
+    window.addEventListener('mouseup', () => { isDragging = false; });
+
+    viewport.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 1) {
+        isDragging = true;
+        lastMouseX = e.touches[0].clientX;
+        lastMouseY = e.touches[0].clientY;
+      }
+    }, {passive: true});
+
+    window.addEventListener('touchmove', (e) => {
+      if (!isDragging || e.touches.length !== 1) return;
+      const dx = e.touches[0].clientX - lastMouseX;
+      const dy = e.touches[0].clientY - lastMouseY;
+
+      if (currentViewMode === 'iso') {
+        rotZ -= dx * 0.45;
+        rotX -= dy * 0.35;
+        if (rotX < 20) rotX = 20;
+        if (rotX > 85) rotX = 85;
+      } else {
+        rotZ -= dx * 0.45;
+        rotX -= dy * 0.25;
+        if (rotX < 65) rotX = 65;
+        if (rotX > 105) rotX = 105;
+      }
+
+      lastMouseX = e.touches[0].clientX;
+      lastMouseY = e.touches[0].clientY;
+
+      applyTransform();
+    }, {passive: true});
+
+    window.addEventListener('touchend', () => { isDragging = false; });
+
+    function applyTransform() {
+      // 3D Matrix: 1) 이동(방 중심 타겟), 2) 시선 회전(Pitch rotX, Yaw rotZ), 3) 확대(zoom)
+      scene.style.transform = `scale(${zoom}) rotateX(${rotX}deg) rotateZ(${rotZ}deg) translate3d(${-targetX}px, ${-targetY}px, ${-targetZ}px)`;
+      
+      if (currentViewMode === 'iso') {
+        rotDeg.innerText = `Pitch: ${Math.round(rotX)}° / Yaw: ${Math.round(rotZ)}°`;
+      } else {
+        const eyeTilt = Math.round(rotX - 90);
+        rotDeg.innerText = `아이레벨 틸트: ${eyeTilt}° / 360° 회전: ${Math.round(rotZ)}°`;
+      }
+    }
+
+    function updateZoom(val) {
+      zoom = parseFloat(val);
+      applyTransform();
+    }
+
+    function setViewMode(mode) {
+      currentViewMode = mode;
+      const btnIso = document.getElementById('btnIsoMode');
+      const btnEye = document.getElementById('btnEyeMode');
+      const extShells = document.querySelectorAll('.exterior-shell');
+
+      if (mode === 'eye') {
+        btnIso.className = "px-3 py-1.5 rounded font-semibold transition-all text-slate-400 hover:text-white";
+        btnEye.className = "px-3 py-1.5 rounded font-semibold transition-all bg-blue-600 text-white shadow-sm";
+        viewModeHint.innerText = "1인칭 룸 투어 모드: 방 안 중심 눈높이(1.6m)에서 360도로 가구와 벽체를 둘러봅니다.";
+        eyeNotice.classList.remove('hidden');
+        
+        // 1인칭 시야를 가리는 외부 철골 외벽 자동 숨김
+        extShells.forEach(el => el.classList.add('hidden-in-eye'));
+
+        // 전체 조감 상태였다면 거실로 자동 진입
+        if (currentRoom === 'all') {
+          selectRoom('living');
+        } else {
+          selectRoom(currentRoom);
+        }
+      } else {
+        btnEye.className = "px-3 py-1.5 rounded font-semibold transition-all text-slate-400 hover:text-white";
+        btnIso.className = "px-3 py-1.5 rounded font-semibold transition-all bg-blue-600 text-white shadow-sm";
+        viewModeHint.innerText = "조감도 모드: 외부 상공에서 전체 공간을 내려다봅니다.";
+        eyeNotice.classList.add('hidden');
+
+        // 외부 외벽 복원
+        extShells.forEach(el => el.classList.remove('hidden-in-eye'));
+
+        selectRoom(currentRoom);
+      }
+    }
+
+    function selectRoom(room) {
+      currentRoom = room;
+
+      // Update pills
+      document.querySelectorAll('#viewport-3d button[id^="pill-"]').forEach(btn => {
+        btn.className = "px-2.5 py-1 rounded-md text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-all";
+      });
+      const activePill = document.getElementById('pill-' + room);
+      if (activePill) activePill.className = "px-2.5 py-1 rounded-md text-xs font-medium bg-blue-600 text-white shadow-sm transition-all";
+
+      const spec = ROOM_SPECS[room];
+      if (!spec) return;
+
+      if (room === 'all') {
+        // 전체 조감은 항상 조감도 모드로 전환
+        if (currentViewMode === 'eye') {
+          setViewMode('iso');
+          return;
+        }
+        targetX = spec.iso.targetX;
+        targetY = spec.iso.targetY;
+        targetZ = spec.iso.targetZ;
+        rotX = spec.iso.rotX;
+        rotZ = spec.iso.rotZ;
+        zoom = spec.iso.zoom;
+        modeBadge.innerText = "조감 모드: 전체 16.4평";
+      } else {
+        if (currentViewMode === 'eye') {
+          targetX = spec.eye.targetX;
+          targetY = spec.eye.targetY;
+          targetZ = spec.eye.targetZ;
+          rotX = spec.eye.rotX; // 84° 수평 눈높이
+          rotZ = spec.eye.rotZ;
+          zoom = spec.eye.zoom; // 3.1x ~ 3.3x 방 내부 밀착
+          modeBadge.innerText = `1인칭 눈높이: [${roomLabel(room)}]`;
+        } else {
+          targetX = spec.iso.targetX;
+          targetY = spec.iso.targetY;
+          targetZ = spec.iso.targetZ;
+          rotX = spec.iso.rotX;
+          rotZ = spec.iso.rotZ;
+          zoom = spec.iso.zoom;
+          modeBadge.innerText = `조감 모드: [${roomLabel(room)}]`;
+        }
+      }
+
+      // UI Text update
+      document.getElementById('featureTitle').innerText = spec.title;
+      document.getElementById('featureDesc').innerText = spec.desc;
+
+      zoomSlider.value = zoom;
+      applyTransform();
+    }
+
+    function roomLabel(room) {
+      switch(room) {
+        case 'living': return 'LDK 거실 & 아일랜드';
+        case 'bike': return '현관 클린전실';
+        case 'breezeway': return '단열 통로 (W7)';
+        case 'bed': return '마스터 침실';
+        case 'studio': return '개발실 & 서브드레스룸';
+        case 'bath': return '3분리 욕실';
+        default: return '전체';
+      }
+    }
+
+    function resetCamera() {
+      if (currentViewMode === 'iso') {
+        selectRoom('all');
+      } else {
+        selectRoom('living');
+      }
+    }
+
+    // Render 16.4 Pyeong 3D Scene Geometry
+    function renderScene() {
+      scene.innerHTML = `
+        <!-- GROUND FOUNDATION SLAB -->
+        <div class="face-3d" style="width: 520px; height: 390px; left: -260px; top: -195px; transform: translateZ(-2px); background: #090d16; border: 1px solid #1e3250; box-shadow: 0 40px 80px rgba(0,0,0,0.9);"></div>
+
+        <!-- ================= WING A: PUBLIC LIVING WING (TOP, -Y) ================= -->
+        <!-- Wing A Floor (3m x 9m -> 450px x 140px, Center: 0, -90) -->
+        <div class="face-3d wood-floor" style="width: 450px; height: 140px; left: -225px; top: -160px; transform: translateZ(0); border: 2px solid #334155;">
+          
+          <!-- Section 1: Entry & Clean Vestibule (Left 90px = 1,800mm, Center: -180, -90) -->
+          <div class="face-3d tile-floor" style="width: 90px; height: 140px; left: 0; top: 0; border-right: 2px solid #475569;">
+            <!-- Vertical Wall-mount Roadbike (Space-saving) -->
+            <div class="face-3d" style="width: 14px; height: 70px; left: 12px; top: 35px; transform: translateZ(28px) rotateY(-90deg); background: #3b82f6; border: 1px solid #93c5fd;"></div>
+            <div class="face-3d" style="width: 42px; height: 26px; left: 24px; top: 52px; transform: translateZ(25px) rotateX(90deg); background: #059669; border-radius: 4px; border: 1px solid #34d399;">
+              <span style="font-size: 7px; color: #fff; font-weight: bold; display: block; text-align: center; line-height: 24px;">벽걸이 자전거</span>
+            </div>
+            <!-- Full Height Shoe & Mirror Storage Wall -->
+            <div class="face-3d" style="width: 24px; height: 100px; left: 5px; top: 10px; transform: translateZ(42px); background: #334155; border: 1px solid #64748b; box-shadow: 2px 2px 5px rgba(0,0,0,0.5);">
+              <div style="font-size: 7px; color: #cbd5e1; text-align: center; padding-top: 15px;">신발장/전신거울</div>
+            </div>
+            <div style="position: absolute; bottom: 8px; left: 15px; font-size: 7px; color: #94a3b8; font-weight: bold;">현관문 D1</div>
+          </div>
+
+          <!-- Section 2: Kitchen & Expanded 1,800mm Island (Middle 150px = 3,000mm) -->
+          <!-- Wall Sink & Cooking Counter -->
+          <div class="face-3d" style="width: 32px; height: 120px; left: 100px; top: 10px; transform: translateZ(24px); background: #f8fafc; border: 1px solid #cbd5e1; box-shadow: 0 10px 15px rgba(0,0,0,0.4);">
+            <div style="font-size: 7px; color: #334155; font-weight: bold; text-align: center; padding-top: 6px;">싱크대 카운터</div>
+            <div style="width: 12px; height: 12px; border-radius: 50%; border: 1.5px solid #ef4444; margin: 12px auto 0;"></div>
+            <div style="font-size: 6px; color: #ef4444; text-align: center;">인덕션 3구</div>
+          </div>
+          <!-- 1,800mm x 800mm Island Counter & Dining Table (Center: -35, -70) -->
+          <div class="face-3d" style="width: 90px; height: 42px; left: 145px; top: 48px; transform: translateZ(26px); background: #b45309; border: 1.5px solid #f59e0b; box-shadow: 0 10px 16px rgba(0,0,0,0.4);">
+            <div style="font-size: 8px; color: #fff; text-align: center; line-height: 22px; font-weight: bold;">1,800mm 아일랜드 식탁</div>
+            <div style="font-size: 6px; color: #fef3c7; text-align: center;">(2인 대면식 식사 / 하부 수납)</div>
+          </div>
+          <!-- 2 Bar Stools -->
+          <div class="face-3d" style="width: 16px; height: 16px; left: 160px; top: 98px; transform: translateZ(16px); background: #475569; border-radius: 50%; border: 1px solid #94a3b8;"></div>
+          <div class="face-3d" style="width: 16px; height: 16px; left: 200px; top: 98px; transform: translateZ(16px); background: #475569; border-radius: 50%; border: 1px solid #94a3b8;"></div>
+
+          <!-- Section 3: Living Room (Right 210px = 4,200mm, Center: 110, -90) -->
+          <!-- 2-Seater Fabric Modular Sofa -->
+          <div class="face-3d" style="width: 65px; height: 95px; left: 265px; top: 22px; transform: translateZ(18px); background: #2563eb; border-radius: 4px; border: 1px solid #60a5fa; box-shadow: 0 12px 18px rgba(0,0,0,0.5);">
+            <div style="font-size: 8px; color: #fff; font-weight: bold; text-align: center; padding-top: 32px;">2인 패브릭 소파</div>
+          </div>
+          <!-- Solid Wood Coffee Table -->
+          <div class="face-3d" style="width: 36px; height: 50px; left: 345px; top: 45px; transform: translateZ(14px); background: #78350f; border: 1px solid #92400e;">
+            <div style="font-size: 6px; color: #fde68a; text-align: center; line-height: 48px;">티테이블</div>
+          </div>
+          <!-- Wall mounted 75-inch TV/Soundbar -->
+          <div class="face-3d" style="width: 85px; height: 6px; left: 340px; top: 4px; transform: translateZ(36px); background: #0f172a; border: 1.5px solid #38bdf8;">
+            <div style="font-size: 7px; color: #38bdf8; text-align: center; font-weight: bold;">75인치 스마트 TV</div>
+          </div>
+        </div>
+
+        <!-- Wing A North Steel Wall (Exterior shell) -->
+        <div class="face-3d steel-ribs exterior-shell" style="width: 450px; height: 70px; left: -225px; top: -160px; transform: rotateX(-90deg); transform-origin: top center;"></div>
+
+        <!-- ================= COURTYARD WOODEN DECK (MIDDLE) ================= -->
+        <div class="face-3d deck-floor" style="width: 250px; height: 50px; left: -100px; top: -20px; transform: translateZ(0); border: 1px solid #d97706;">
+          <div style="font-size: 8px; color: #fff; font-weight: bold; text-align: center; line-height: 48px; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">중정 프라이빗 우드 테라스 (3,000×5,000mm)</div>
+          <!-- Courtyard Zinc Tool Cabinet for Bike maintenance oils -->
+          <div class="face-3d" style="width: 28px; height: 18px; left: 10px; top: 5px; transform: translateZ(20px); background: #334155; border: 1px solid #64748b;">
+            <div style="font-size: 6px; color: #94a3b8; text-align: center; line-height: 16px;">외부 공구함</div>
+          </div>
+        </div>
+
+        <!-- ================= INSULATED BREEZEWAY (MIDDLE-RIGHT) ================= -->
+        <!-- Insulated Connecting Breezeway (No glass greenhouse! 150mm Urethane wall + W7 Tilt Window, Center: 190, 5) -->
+        <div class="face-3d insulated-wall" style="width: 80px; height: 50px; left: 150px; top: -20px; transform: translateZ(0);">
+          <div style="font-size: 7.5px; color: #38bdf8; font-weight: bold; text-align: center; padding-top: 8px;">단열 연결통로</div>
+          <div style="font-size: 6.5px; color: #94a3b8; text-align: center;">(150mm 우레탄벽)</div>
+          <!-- West Wall W7 Tilt & Turn Opening Window (1,200 x 800mm) -->
+          <div class="face-3d glass-wall" style="width: 32px; height: 2px; left: 24px; top: 0px; transform: translateZ(28px); border: 1.5px solid #38bdf8;">
+            <div style="font-size: 6px; color: #38bdf8; text-align: center; transform: rotateX(-90deg);">W7 틸트창</div>
+          </div>
+          <!-- Sliding Interior Doors D5 & D6 representation -->
+          <div style="position: absolute; top: -1px; left: 25px; width: 30px; height: 2px; background: #60a5fa;"></div>
+          <div style="position: absolute; bottom: -1px; left: 25px; width: 30px; height: 2px; background: #60a5fa;"></div>
+        </div>
+
+        <!-- ================= WING B: PRIVATE DEV & BED WING (BOTTOM, +Y) ================= -->
+        <!-- Wing B Floor (3m x 9m -> 450px x 140px, Center: 0, 100) -->
+        <div class="face-3d wood-floor" style="width: 450px; height: 140px; left: -225px; top: 30px; transform: translateZ(0); border: 2px solid #334155;">
+          
+          <!-- Section 1: Master Bedroom (Left 150px = 3,000mm, Center: -150, 100) -->
+          <div class="face-3d" style="width: 150px; height: 140px; left: 0; top: 0;">
+            <!-- Queen Bed with 4 Under-bed Large Storage Drawers (1,500 x 2,000mm) -->
+            <div class="face-3d" style="width: 82px; height: 108px; left: 28px; top: 16px; transform: translateZ(18px); background: #f8fafc; border-radius: 4px; border: 1px solid #cbd5e1; box-shadow: 0 10px 16px rgba(0,0,0,0.5);">
+              <!-- Duvet / Blanket -->
+              <div style="width: 78px; height: 72px; background: #0369a1; border-radius: 2px; margin: 30px auto 0; text-align: center; color: #fff; font-size: 7.5px; font-weight: bold; padding-top: 14px;">
+                퀸 베드 (1,500×2,000)<br>
+                <span style="font-size: 6.5px; color: #bae6fd;">[하부 4구 서랍 400L]</span>
+              </div>
+              <!-- Pillows -->
+              <div style="position: absolute; top: 7px; left: 7px; width: 28px; height: 16px; background: #fff; border-radius: 2px; box-shadow: 0 1px 3px rgba(0,0,0,0.2);"></div>
+              <div style="position: absolute; top: 7px; right: 7px; width: 28px; height: 16px; background: #fff; border-radius: 2px; box-shadow: 0 1px 3px rgba(0,0,0,0.2);"></div>
+            </div>
+            <!-- Bedside Nightstand -->
+            <div class="face-3d" style="width: 20px; height: 24px; left: 5px; top: 18px; transform: translateZ(14px); background: #78350f; border: 1px solid #92400e;">
+              <div style="font-size: 6px; color: #fef3c7; text-align: center; line-height: 20px;">협탁</div>
+            </div>
+            <!-- North 4-Door Wardrobe Closet -->
+            <div class="face-3d" style="width: 140px; height: 18px; left: 5px; top: 120px; transform: translateZ(42px); background: #334155; border: 1px solid #475569;">
+              <div style="font-size: 7px; color: #cbd5e1; text-align: center; line-height: 16px;">4도어 메인 붙박이장</div>
+            </div>
+          </div>
+
+          <!-- Soundproof Stud Wall (2P Gypsum + 50K Glasswool between Bed & Studio) -->
+          <div class="face-3d soundproof-wall" style="width: 6px; height: 140px; left: 150px; top: 0; transform: translateZ(30px);">
+            <div style="font-size: 6px; color: #fff; transform: rotateZ(90deg); transform-origin: left top; white-space: nowrap; margin-top: 15px; margin-left: 2px;">차음벽(2P+50K)</div>
+          </div>
+
+          <!-- Section 2: Developer Studio & Sub Dressroom (Middle 160px = 3,200mm, Center: 5, 100) -->
+          <div class="face-3d" style="width: 160px; height: 140px; left: 156px; top: 0; background: rgba(139, 92, 246, 0.05);">
+            <!-- 1,500mm x 800mm High-Performance Coding Desk (Solid Oak) -->
+            <div class="face-3d" style="width: 90px; height: 46px; left: 12px; top: 22px; transform: translateZ(24px); background: #1e293b; border: 1.5px solid #8b5cf6; box-shadow: 0 12px 18px rgba(0,0,0,0.6);">
+              <div style="font-size: 7.5px; color: #c4b5fd; font-weight: bold; text-align: center; line-height: 42px;">1,500mm 코딩 데스크</div>
+            </div>
+            <!-- Dual Ultrawide Monitors with Blue Glow -->
+            <div class="face-3d monitor-glow" style="width: 40px; height: 5px; left: 15px; top: 25px; transform: translateZ(42px) rotateX(15deg); background: #0284c7; border: 1px solid #38bdf8;"></div>
+            <div class="face-3d monitor-glow" style="width: 40px; height: 5px; left: 58px; top: 25px; transform: translateZ(42px) rotateX(15deg); background: #0284c7; border: 1px solid #38bdf8;"></div>
+            <!-- Ergonomic Mesh Chair -->
+            <div class="face-3d" style="width: 26px; height: 26px; left: 44px; top: 78px; transform: translateZ(16px); background: #475569; border-radius: 50%; border: 1px solid #94a3b8; box-shadow: 0 8px 10px rgba(0,0,0,0.4);">
+              <div style="width: 16px; height: 5px; background: #0f172a; margin: 2px auto 0; border-radius: 2px;"></div>
+            </div>
+
+            <!-- Sub Dressroom: 1,500mm System Hanger & Styler / Airdresser -->
+            <div class="face-3d" style="width: 45px; height: 60px; left: 110px; top: 15px; transform: translateZ(36px); background: #334155; border: 1.5px solid #a78bfa;">
+              <div style="font-size: 6.5px; color: #ede9fe; text-align: center; padding-top: 8px; font-weight: bold;">서브 드레스룸</div>
+              <div style="font-size: 5.5px; color: #c4b5fd; text-align: center;">(시스템 행거)</div>
+            </div>
+            <!-- Styler / Airdresser Tower -->
+            <div class="face-3d" style="width: 45px; height: 35px; left: 110px; top: 85px; transform: translateZ(44px); background: #1e1e2e; border: 1px solid #c4b5fd;">
+              <div style="font-size: 6.5px; color: #a78bfa; text-align: center; line-height: 32px;">에어드레서</div>
+            </div>
+          </div>
+
+          <!-- Section 3: 3-Way Split Hotel Bathroom (Right 134px = 2,700mm, Center: 155, 100) -->
+          <div class="face-3d tile-floor" style="width: 134px; height: 140px; left: 316px; top: 0; border-left: 2px solid #64748b;">
+            <!-- Zone A: Independent Toilet Cubicle (Pocket Door D7-A) -->
+            <div class="face-3d" style="width: 55px; height: 60px; left: 5px; top: 8px; transform: translateZ(35px); background: #334155; border: 1.5px solid #64748b;">
+              <div style="font-size: 7px; color: #cbd5e1; text-align: center; padding-top: 14px;">독립 양변기실<br><span style="font-size: 5.5px; color: #94a3b8;">(포켓도어 D7-A)</span></div>
+              <!-- Toilet Bowl -->
+              <div style="width: 16px; height: 20px; background: #fff; border-radius: 4px; margin: 4px auto 0;"></div>
+            </div>
+
+            <!-- Zone B: Independent Shower Stall (Glass Door D7-B) -->
+            <div class="face-3d glass-wall" style="width: 62px; height: 60px; left: 66px; top: 8px; transform: translateZ(35px); border: 1.5px solid #38bdf8;">
+              <div style="font-size: 7px; color: #38bdf8; text-align: center; padding-top: 14px;">독립 샤워실<br><span style="font-size: 5.5px; color: #7dd3fc;">(도어 D7-B)</span></div>
+              <!-- Rain shower head -->
+              <div style="width: 8px; height: 8px; border-radius: 50%; background: #38bdf8; margin: 4px auto 0;"></div>
+            </div>
+
+            <!-- Zone C: Corridor Open 1,200mm Double Powder & Vanity Sink -->
+            <div class="face-3d" style="width: 68px; height: 35px; left: 8px; top: 88px; transform: translateZ(24px); background: #f8fafc; border: 1.5px solid #94a3b8; box-shadow: 0 6px 12px rgba(0,0,0,0.3);">
+              <div style="font-size: 6.5px; color: #1e293b; font-weight: bold; text-align: center; line-height: 20px;">1,200mm 세면 파우더</div>
+              <div style="font-size: 5.5px; color: #64748b; text-align: center;">(더블 언더카운터볼)</div>
+            </div>
+
+            <!-- Zone D: Washer & Dryer Tower (WashTower) -->
+            <div class="face-3d" style="width: 44px; height: 42px; left: 84px; top: 85px; transform: translateZ(42px); background: #1e1e2e; border: 1.5px solid #64748b;">
+              <div style="font-size: 6.5px; color: #e2e8f0; text-align: center; line-height: 38px; font-weight: bold;">세탁·건조 타워</div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- South Outer Wall (Exterior shell) -->
+        <div class="face-3d steel-ribs exterior-shell" style="width: 450px; height: 70px; left: -225px; top: 170px; transform: rotateX(-90deg); transform-origin: top center;"></div>
+
+        <!-- Large Glass Windows (Living Wing Front, Exterior shell) -->
+        <div class="face-3d glass-wall exterior-shell" style="width: 210px; height: 65px; left: 15px; top: -20px; transform: rotateX(-90deg); transform-origin: top center;">
+          <div style="font-size: 8px; color: #38bdf8; font-weight: bold; text-align: center; line-height: 60px;">거실 3중 시스템 슬라이딩창 (W2/D3)</div>
+        </div>
+      `;
+    }
+
+    // Initialize View
+    renderScene();
+    selectRoom('all');
+  </script>
+</body>
+</html>

@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>완주 구이면 대지 준공 360도 3D 인터랙티브 뷰어 (정축척 검증)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background-color: #070d19;
+      color: #e2e8f0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      overflow-x: hidden;
+      user-select: none;
+    }
+
+    /* 3D 뷰포트 & 씬 환경 */
+    .viewport-3d {
+      perspective: 1300px;
+      perspective-origin: 50% 45%;
+      overflow: hidden;
+      cursor: grab;
+    }
+    .viewport-3d:active {
+      cursor: grabbing;
+    }
+    .scene-root {
+      transform-style: preserve-3d;
+      transition: transform 0.05s linear;
+      will-change: transform;
+    }
+    .scene-root.smooth-transition {
+      transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    /* 3D 오브젝트 기본 공통 속성 */
+    .face {
+      position: absolute;
+      box-sizing: border-box;
+      backface-visibility: visible;
+    }
+    .preserve-3d {
+      transform-style: preserve-3d;
+    }
+
+    /* 조명 테마 전환 */
+    .theme-day {
+      background: radial-gradient(circle at 50% 20%, #152847 0%, #0a1324 70%, #060b17 100%);
+    }
+    .theme-sunset {
+      background: radial-gradient(circle at 60% 40%, #3a1f28 0%, #1a152d 55%, #070914 100%);
+    }
+    .theme-night {
+      background: radial-gradient(circle at 50% 10%, #0b1528 0%, #050a14 65%, #02040a 100%);
+    }
+
+    /* 커스텀 슬라이더 */
+    input[type=range] {
+      accent-color: #38bdf8;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col theme-day" id="mainBody">
+
+  <!-- 상단 글로벌 헤더 -->
+  <header class="bg-slate-900/90 backdrop-blur border-b border-slate-800 px-6 py-3 flex items-center justify-between z-30 sticky top-0">
+    <div class="flex items-center space-x-4">
+      <a href="index.html" class="text-xs px-2.5 py-1 rounded bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-700 transition">
+        &larr; 통합 허브로 이동
+      </a>
+      <div>
+        <h1 class="text-base font-bold text-white tracking-tight flex items-center gap-2">
+          <span>완주군 구이면 대지 65평 준공 3D 인터랙티브 뷰어</span>
+          <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800 font-normal">3:1 정축척 검증</span>
+        </h1>
+        <p class="text-xs text-slate-400">평면도(mvtainer_architecture.html) 치수 100% 일치 | 동서 9m × 남북 3m 듀얼 연동 + 2.5m 중정 + 3kW 태양광 8매</p>
+      </div>
+    </div>
+
+    <!-- 우측 상단 메트릭 요약 뱃지 -->
+    <div class="hidden md:flex items-center space-x-6 text-xs">
+      <div class="text-right">
+        <span class="text-slate-400 block text-[10px]">건축 구조 치수</span>
+        <span class="font-semibold text-emerald-400">16.34평 (동A 8.17평 + 동B 8.17평 + 중정 5.14평)</span>
+      </div>
+      <div class="h-6 w-px bg-slate-800"></div>
+      <div class="text-right">
+        <span class="text-slate-400 block text-[10px]">태양광 발전</span>
+        <span class="font-semibold text-amber-300">3kW 양면형 8매 (A동 4매 + B동 4매)</span>
+      </div>
+      <div class="h-6 w-px bg-slate-800"></div>
+      <div class="text-right">
+        <span class="text-slate-400 block text-[10px]">차량 계획</span>
+        <span class="font-semibold text-sky-400">모닝 하이브리드 (3.5m × 5.0m 주차 패드)</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- 메인 뷰포트 영역 -->
+  <main class="flex-1 relative overflow-hidden flex flex-col">
+
+    <!-- 3D 캔버스 영역 -->
+    <div id="viewport3D" class="viewport-3d flex-1 w-full h-[700px] flex items-center justify-center relative select-none">
+      
+      <!-- 3D 씬 루트 (기준 축척: 1m = 28px) -->
+      <div id="sceneRoot" class="scene-root relative" style="transform: rotateX(55deg) rotateZ(45deg) scale(1);">
+
+        <!-- ================= [레이어 1] 65평 대지 슬래브 (Base Terrain: 18m × 14.5m = 504px × 406px × 18px) ================= -->
+        <div class="preserve-3d absolute" style="width: 504px; height: 406px; left: -252px; top: -203px;">
+          <!-- 대지 윗면 (잔디 + 마당 부지) -->
+          <div class="face w-full h-full rounded-sm border border-emerald-950/40 shadow-2xl"
+               style="transform: translateZ(0px); background: radial-gradient(circle at 60% 40%, #1c2e26 0%, #14221c 60%, #0d1713 100%);">
+            
+            <!-- 지적 경계선 점선 표시 (65평 / 215㎡) -->
+            <div class="absolute inset-2 border border-dashed border-emerald-500/30 rounded pointer-events-none">
+              <span class="absolute top-1 left-2 text-[9px] text-emerald-400/50 font-mono">지적 경계선 (대지 65평 / 214.8㎡)</span>
+            </div>
+
+            <!-- 현무암 판석 디딤석 산책로 (진입도로/주차장 -> 동 A 현관문 D1) -->
+            <div class="absolute w-3.5 h-3.5 bg-slate-600/70 rounded-full border border-slate-500/40" style="left: 65px; top: 180px;"></div>
+            <div class="absolute w-3.5 h-3.5 bg-slate-600/70 rounded-full border border-slate-500/40" style="left: 80px; top: 150px;"></div>
+            <div class="absolute w-3.5 h-3.5 bg-slate-600/70 rounded-full border border-slate-500/40" style="left: 100px; top: 120px;"></div>
+            <div class="absolute w-3.5 h-3.5 bg-slate-600/70 rounded-full border border-slate-500/40" style="left: 120px; top: 95px;"></div>
+
+            <!-- 텃밭 및 미니 조경 영역 (동북측 여유 부지) -->
+            <div class="absolute w-28 h-16 rounded border border-amber-900/40 bg-amber-950/30" style="right: 20px; top: 20px;">
+              <span class="text-[9px] text-amber-500/60 px-1.5 block pt-0.5">소형 텃밭 (허브·상추)</span>
+            </div>
+
+            <!-- 지하 매설 배관 경로 (우수관 / 오폐수관) -->
+            <div class="absolute w-44 h-0.5 border-t border-dotted border-cyan-500/30" style="left: 60px; bottom: 40px; transform: rotate(-15deg);"></div>
+          </div>
+
+          <!-- 대지 측면 입체 두께 (높이 16px) -->
+          <div class="face w-full h-4 bg-emerald-950 border-t border-emerald-800/40" style="bottom: -16px; transform: rotateX(-90deg); transform-origin: top;"></div>
+          <div class="face w-4 h-full bg-emerald-950/80 border-l border-emerald-800/40" style="right: -16px; transform: rotateY(90deg); transform-origin: left;"></div>
+          <div class="face w-full h-4 bg-emerald-950/90" style="top: 0; transform: rotateX(90deg); transform-origin: top;"></div>
+          <div class="face w-4 h-full bg-emerald-950/70" style="left: 0; transform: rotateY(-90deg); transform-origin: left;"></div>
+        </div>
+
+        <!-- ================= [레이어 2] 남측 4m 아스팔트 진입 도로 (4m Roadway: 폭 112px) ================= -->
+        <div class="preserve-3d absolute" style="width: 504px; height: 90px; left: -252px; top: 207px;">
+          <div class="face w-full h-full bg-slate-800/95 border-t border-b border-slate-700/60 shadow-lg flex items-center justify-around" style="transform: translateZ(0px);">
+            <!-- 도로 중앙 점선 -->
+            <div class="absolute w-full h-0 border-t-2 border-dashed border-amber-400/50"></div>
+            <span class="text-[10px] text-slate-400/70 tracking-widest font-mono z-10">완주군 구이면 진입 도로 (폭 4.0m 포장로) &rarr;</span>
+          </div>
+        </div>
+
+        <!-- ================= [레이어 3] 투수블록 주차장 패드 & 모닝 하이브리드 (3.5m × 5.0m = 98px × 140px) ================= -->
+        <div class="preserve-3d absolute" style="width: 98px; height: 140px; left: -235px; top: 50px;">
+          <!-- 투수블록 바닥 패드 -->
+          <div class="face w-full h-full bg-slate-800 border-2 border-slate-600/70 rounded shadow-md" style="transform: translateZ(1px);">
+            <div class="absolute inset-1 border border-slate-700 grid grid-cols-3 grid-rows-5 opacity-30">
+              <div class="border border-slate-600"></div><div class="border border-slate-600"></div><div class="border border-slate-600"></div>
+              <div class="border border-slate-600"></div><div class="border border-slate-600"></div><div class="border border-slate-600"></div>
+              <div class="border border-slate-600"></div><div class="border border-slate-600"></div><div class="border border-slate-600"></div>
+              <div class="border border-slate-600"></div><div class="border border-slate-600"></div><div class="border border-slate-600"></div>
+              <div class="border border-slate-600"></div><div class="border border-slate-600"></div><div class="border border-slate-600"></div>
+            </div>
+            <div class="absolute bottom-1 left-2 text-[8px] text-sky-400 font-mono">3.5m × 5.0m 주차 구획</div>
+          </div>
+
+          <!-- 모닝 하이브리드 3D 바디 (전장 3,595mm × 전폭 1,595mm × 전고 1,485mm -> 101px × 45px × 42px) -->
+          <div class="preserve-3d absolute" style="width: 45px; height: 101px; left: 26px; top: 20px; transform: translateZ(2px);">
+            <!-- 하부 섀시 -->
+            <div class="face w-full h-full bg-sky-700/90 rounded border border-sky-400/60 shadow-xl" style="transform: translateZ(14px);">
+              <!-- 전면 헤드라이트 -->
+              <div class="absolute top-1 left-1 right-1 h-5 bg-sky-800 rounded-sm border-b border-sky-600/40 flex justify-between px-1 items-center">
+                <div class="w-2.5 h-1.5 bg-amber-300 rounded-sm shadow-sm" id="carLightL"></div>
+                <div class="w-2.5 h-1.5 bg-amber-300 rounded-sm shadow-sm" id="carLightR"></div>
+              </div>
+              <!-- 루프 캐빈 -->
+              <div class="absolute top-7 left-2 right-2 h-12 bg-slate-900/90 rounded border border-slate-700 flex items-center justify-center">
+                <span class="text-[7px] text-sky-300 font-mono">MORNING</span>
+              </div>
+              <!-- 후면 리어램프 -->
+              <div class="absolute bottom-1 left-1 right-1 h-3.5 bg-sky-800 flex justify-between px-1 items-center">
+                <div class="w-2.5 h-1.5 bg-rose-600 rounded-sm"></div>
+                <div class="w-2.5 h-1.5 bg-rose-600 rounded-sm"></div>
+              </div>
+            </div>
+
+            <!-- 바퀴 4개 -->
+            <div class="face w-2 h-5 bg-slate-900 rounded" style="left: -2px; top: 14px; transform: translateZ(3px);"></div>
+            <div class="face w-2 h-5 bg-slate-900 rounded" style="right: -2px; top: 14px; transform: translateZ(3px);"></div>
+            <div class="face w-2 h-5 bg-slate-900 rounded" style="left: -2px; bottom: 14px; transform: translateZ(3px);"></div>
+            <div class="face w-2 h-5 bg-slate-900 rounded" style="right: -2px; bottom: 14px; transform: translateZ(3px);"></div>
+
+            <!-- 상부 캐빈 루프 (높이 38px) -->
+            <div class="face w-9 h-11 bg-sky-600/90 rounded-sm border border-sky-300/40" style="left: 4px; top: 30px; transform: translateZ(32px);">
+              <div class="absolute top-0 w-full h-2.5 bg-cyan-200/50 border-b border-cyan-100"></div>
+              <div class="absolute bottom-0 w-full h-1.5 bg-cyan-200/40"></div>
+            </div>
+          </div>
+        </div>
+
+
+        <!-- ================= [레이어 4] 동 A: 공용 생활동 (3,000 × 9,000 × 2,900mm -> 252px × 84px × 81px) ================= -->
+        <!-- 위치: 북측 배치 (left: -90px, top: -119px) -> 가로(동서) 252px × 세로(남북) 84px (정확한 3:1 비율!) -->
+        <div class="preserve-3d absolute" style="width: 252px; height: 84px; left: -90px; top: -119px;">
+          
+          <!-- H빔 스틸 기초 바닥 (높이 8px) -->
+          <div class="face w-full h-full bg-slate-950 border border-slate-700" style="transform: translateZ(8px);"></div>
+
+          <!-- 4면 외벽 (높이 81px) -->
+          <!-- 북측 벽 (Back: 가로 252px × 높이 81px) -->
+          <div class="face w-full h-[81px] bg-slate-900 border border-slate-800"
+               style="top: 0; transform: rotateX(90deg); transform-origin: top; background: linear-gradient(to bottom, #1e293b, #0f172a);">
+            <!-- W1 주방 환기창 (1,200 × 600mm -> 폭 34px × 높이 17px, X: 80px) -->
+            <div class="absolute w-[34px] h-[17px] bg-cyan-950 border border-cyan-500/50 rounded-sm" style="left: 80px; top: 25px;"></div>
+            <span class="text-[7px] text-slate-400 font-mono absolute top-2 right-4">WING A (북측 외벽)</span>
+          </div>
+
+          <!-- 남측 벽 (Front, 중정 마주보는 벽: 가로 252px × 높이 81px) -->
+          <div class="face w-full h-[81px] bg-slate-800 border border-slate-700"
+               style="bottom: 0; transform: rotateX(-90deg); transform-origin: bottom; background: linear-gradient(to bottom, #1e293b, #0f172a);">
+            <!-- W2 / D3 거실 3m 파노라마 통창 겸 중정 출입 파티오 도어 (3,000 × 2,000mm -> 폭 84px × 높이 56px, 동측 위치: left 145px) -->
+            <div class="absolute w-[84px] h-[56px] bg-cyan-950/70 border-2 border-cyan-400/70 rounded-sm flex items-center justify-center shadow-lg"
+                 id="winA1" style="left: 145px; bottom: 8px;">
+              <span class="text-[7px] text-cyan-200 font-mono">W2/D3 거실통창 (3m)</span>
+            </div>
+            <!-- 내부 거실/주방 레이블 -->
+            <span class="text-[7px] text-emerald-400 font-mono absolute top-2 left-4">동 A (LDK + 현관전실)</span>
+          </div>
+
+          <!-- 서측 벽 (Left: 세로 84px × 높이 81px) -->
+          <div class="face w-[84px] h-[81px] bg-slate-900 border border-slate-800"
+               style="left: 0; top: 0; transform: rotateY(-90deg); transform-origin: left; background: #0f172a;">
+            <!-- D1 주 출입 현관문 (폭 900mm -> 25px × 높이 60px) -->
+            <div class="absolute w-[25px] h-[60px] bg-slate-800 border-2 border-amber-600/80 rounded-sm flex flex-col items-center justify-end pb-1 shadow-md"
+                 style="left: 30px; bottom: 6px;">
+              <span class="text-[6px] text-amber-400 font-mono">D1</span>
+            </div>
+          </div>
+
+          <!-- 동측 벽 (Right: 세로 84px × 높이 81px) -->
+          <div class="face w-[84px] h-[81px] bg-slate-900 border border-slate-800"
+               style="right: -84px; top: 0; transform: rotateY(90deg); transform-origin: left; background: #0f172a;"></div>
+
+          <!-- A동 지붕 슬래브 (높이 89px) -->
+          <div class="face w-full h-full bg-slate-900 border border-slate-600 shadow-2xl" style="transform: translateZ(89px);">
+            <!-- 지붕 위 1.5kW 태양광 패널 4매 어레이 (실측 1,755×1,038mm -> 49px × 29px, 25도 남향 경사각 배치) -->
+            <div class="absolute inset-x-3 top-2 bottom-2 flex justify-between items-center">
+              <div class="w-[49px] h-[55px] bg-blue-950/90 border border-cyan-400/80 rounded-sm shadow-md flex items-center justify-center"
+                   style="transform: rotateX(-20deg); background: linear-gradient(135deg, #082f49 0%, #0369a1 100%);">
+                <span class="text-[6px] text-cyan-200 font-mono">375W</span>
+              </div>
+              <div class="w-[49px] h-[55px] bg-blue-950/90 border border-cyan-400/80 rounded-sm shadow-md flex items-center justify-center"
+                   style="transform: rotateX(-20deg); background: linear-gradient(135deg, #082f49 0%, #0369a1 100%);">
+                <span class="text-[6px] text-cyan-200 font-mono">375W</span>
+              </div>
+              <div class="w-[49px] h-[55px] bg-blue-950/90 border border-cyan-400/80 rounded-sm shadow-md flex items-center justify-center"
+                   style="transform: rotateX(-20deg); background: linear-gradient(135deg, #082f49 0%, #0369a1 100%);">
+                <span class="text-[6px] text-cyan-200 font-mono">375W</span>
+              </div>
+              <div class="w-[49px] h-[55px] bg-blue-950/90 border border-cyan-400/80 rounded-sm shadow-md flex items-center justify-center"
+                   style="transform: rotateX(-20deg); background: linear-gradient(135deg, #082f49 0%, #0369a1 100%);">
+                <span class="text-[6px] text-cyan-200 font-mono">375W</span>
+              </div>
+            </div>
+            <div class="absolute bottom-0.5 right-2 text-[7px] text-amber-300 font-mono font-bold">1.5kW 태양광 A군 (4매)</div>
+          </div>
+        </div>
+
+
+        <!-- ================= [레이어 5] 중정 데크 & 3중 유리 연결 브릿지 ================= -->
+        <!-- 중정 이격 거리: 세로 2,500mm = 70px (Y: -35px ~ 35px) -->
+        <!-- 5-1. 방킬라이 천연목 중정 데크 (가로 6,800mm × 세로 2,500mm -> 190px × 70px) -->
+        <div class="preserve-3d absolute" style="width: 190px; height: 70px; left: -90px; top: -35px;">
+          <!-- 데크 상판 (높이 8px) -->
+          <div class="face w-full h-full bg-amber-900/90 border border-amber-700/80 rounded-sm shadow-xl"
+               style="transform: translateZ(8px); background-image: repeating-linear-gradient(90deg, #78350f, #78350f 8px, #451a03 8px, #451a03 10px);">
+            
+            <!-- 데크 위 야외 원목 티테이블 (1,200 × 700mm -> 34px × 20px) 및 의자 -->
+            <div class="absolute w-[34px] h-[20px] bg-amber-950 border border-amber-600/70 rounded shadow" style="left: 75px; top: 25px;">
+              <span class="text-[6px] text-amber-200/90 block text-center mt-0.5 font-mono">TABLE</span>
+            </div>
+            <div class="absolute w-[28px] h-[6px] bg-amber-900 border border-amber-700 rounded-sm" style="left: 78px; top: 15px;"></div>
+            <div class="absolute w-[28px] h-[6px] bg-amber-900 border border-amber-700 rounded-sm" style="left: 78px; top: 48px;"></div>
+
+            <!-- 자전거 거치대 (인피자 이노사이클 18 정비존) -->
+            <div class="absolute w-12 h-3.5 bg-slate-900 border border-slate-600 rounded flex items-center justify-around px-1" style="left: 15px; bottom: 8px;">
+              <div class="w-1 h-1 bg-cyan-400 rounded-full"></div>
+              <span class="text-[6px] text-cyan-300 font-mono">GRAVEL</span>
+            </div>
+
+            <div class="absolute top-1 left-2 text-[8px] text-amber-300 font-semibold tracking-wider">
+              방킬라이 중정 (2.5m × 6.8m / 5.1평)
+            </div>
+          </div>
+          <!-- 데크 장선 측면 -->
+          <div class="face w-full h-2 bg-amber-950 border-t border-amber-800" style="bottom: -8px; transform: rotateX(-90deg); transform-origin: top;"></div>
+        </div>
+
+        <!-- 5-2. 고단열 연결 복도 (가로 2,200mm × 세로 2,500mm -> 62px × 70px × 높이 75px) -->
+        <!-- 위치: 동측 연결 (left: 100px, top: -35px) -> 거실 ↔ 욕실/작업실 직결 (도어 배제·W7 개폐창) -->
+        <div class="preserve-3d absolute" style="width: 62px; height: 70px; left: 100px; top: -35px;">
+          <!-- 복도 바닥 (높이 8px) -->
+          <div class="face w-full h-full bg-slate-800 border border-slate-600" style="transform: translateZ(8px);"></div>
+          <!-- 블랙 징크 단열 지붕 (높이 75px / 유리 천장 배제) -->
+          <div class="face w-full h-full bg-slate-900 border border-slate-700 shadow-md flex items-center justify-center" style="transform: translateZ(75px);">
+            <div class="text-[7px] text-slate-300 font-mono">BREEZEWAY</div>
+          </div>
+          <!-- 서측 벽: 150mm 패널벽 + W7 개폐식 시스템 환기창 (세로 70px × 높이 75px / 도어 없음) -->
+          <div class="face w-[70px] h-[75px] bg-slate-800 border border-slate-700"
+               style="left: 0; top: 0; transform: rotateY(-90deg); transform-origin: left; background: linear-gradient(to bottom, #1e293b, #0f172a);">
+            <!-- W7 턴앤틸트 시스템 개폐창 (폭 1,200mm -> 34px × 높이 24px) -->
+            <div class="absolute w-[34px] h-[24px] bg-cyan-950/80 border-2 border-cyan-400/80 rounded-sm flex items-center justify-center shadow"
+                 id="winBreezeway" style="left: 18px; top: 24px;">
+              <span class="text-[5px] text-cyan-200 font-mono">W7 개폐창</span>
+            </div>
+          </div>
+          <!-- 동측 외벽: 150mm 완전 차폐벽 (세로 70px × 높이 75px / 창호 없음, 방범 극대화) -->
+          <div class="face w-[70px] h-[75px] bg-slate-900 border border-slate-800"
+               style="right: -70px; top: 0; transform: rotateY(90deg); transform-origin: left; background: #0f172a;"></div>
+        </div>
+
+
+        <!-- ================= [레이어 6] 동 B: 프라이빗 침실·작업·욕실동 (3,000 × 9,000 × 2,900mm -> 252px × 84px × 81px) ================= -->
+        <!-- 위치: 남측 배치 (left: -90px, top: 35px) -> 가로(동서) 252px × 세로(남북) 84px (정확한 3:1 비율!) -->
+        <div class="preserve-3d absolute" style="width: 252px; height: 84px; left: -90px; top: 35px;">
+          
+          <!-- H빔 스틸 기초 바닥 (높이 8px) -->
+          <div class="face w-full h-full bg-slate-950 border border-slate-700" style="transform: translateZ(8px);"></div>
+
+          <!-- 북측 벽 (Back, 중정 마주보는 벽: 가로 252px × 높이 81px) -->
+          <div class="face w-full h-[81px] bg-slate-800 border border-slate-700"
+               style="top: 0; transform: rotateX(90deg); transform-origin: top; background: linear-gradient(to bottom, #1e293b, #0f172a);">
+            <!-- W4 침실 중정 조망창 (1,800 × 1,800mm -> 폭 50px × 높이 50px, 서측 침실 위치: left 25px) -->
+            <div class="absolute w-[50px] h-[50px] bg-cyan-950/70 border-2 border-cyan-400/60 rounded-sm flex items-center justify-center shadow-lg"
+                 id="winB1" style="left: 25px; bottom: 8px;">
+              <span class="text-[6px] text-cyan-200 font-mono">W4 침실창</span>
+            </div>
+            <span class="text-[7px] text-purple-400 font-mono absolute top-2 right-4">동 B (침실·작업실·욕실)</span>
+          </div>
+
+          <!-- 남측 벽 (Front, 남측 도로/마당 바라보는 벽: 가로 252px × 높이 81px) -->
+          <div class="face w-full h-[81px] bg-slate-900 border border-slate-800"
+               style="bottom: 0; transform: rotateX(-90deg); transform-origin: bottom; background: linear-gradient(to bottom, #1e293b, #0f172a);">
+            <!-- W5 개발/유튜브 작업실 턴앤틸트창 (1,500 × 1,200mm -> 폭 42px × 높이 34px, 중앙 작업실 위치: left 110px) -->
+            <div class="absolute w-[42px] h-[34px] bg-cyan-950/80 border-2 border-indigo-400/70 rounded-sm flex items-center justify-center shadow-lg"
+                 id="winB2" style="left: 110px; bottom: 15px;">
+              <span class="text-[6px] text-indigo-200 font-mono">W5 코딩창</span>
+            </div>
+            <!-- W6 욕실 습기 배출창 (600 × 600mm -> 폭 17px × 높이 17px, 동측 욕실 위치: left 210px) -->
+            <div class="absolute w-[17px] h-[17px] bg-cyan-950 border border-cyan-500/50 rounded-sm" style="left: 210px; top: 25px;"></div>
+          </div>
+
+          <!-- 서측 벽 (Left: 세로 84px × 높이 81px) -->
+          <div class="face w-[84px] h-[81px] bg-slate-900 border border-slate-800"
+               style="left: 0; top: 0; transform: rotateY(-90deg); transform-origin: left; background: #0f172a;"></div>
+
+          <!-- 동측 벽 (Right: 세로 84px × 높이 81px) -->
+          <div class="face w-[84px] h-[81px] bg-slate-900 border border-slate-800"
+               style="right: -84px; top: 0; transform: rotateY(90deg); transform-origin: left; background: #0f172a;"></div>
+
+          <!-- B동 지붕 슬래브 (높이 89px) -->
+          <div class="face w-full h-full bg-slate-900 border border-slate-600 shadow-2xl" style="transform: translateZ(89px);">
+            <!-- 지붕 위 1.5kW 태양광 패널 4매 어레이 (실측 1,755×1,038mm -> 49px × 29px, 25도 남향 경사각 배치) -->
+            <div class="absolute inset-x-3 top-2 bottom-2 flex justify-between items-center">
+              <div class="w-[49px] h-[55px] bg-blue-950/90 border border-cyan-400/80 rounded-sm shadow-md flex items-center justify-center"
+                   style="transform: rotateX(-20deg); background: linear-gradient(135deg, #082f49 0%, #0369a1 100%);">
+                <span class="text-[6px] text-cyan-200 font-mono">375W</span>
+              </div>
+              <div class="w-[49px] h-[55px] bg-blue-950/90 border border-cyan-400/80 rounded-sm shadow-md flex items-center justify-center"
+                   style="transform: rotateX(-20deg); background: linear-gradient(135deg, #082f49 0%, #0369a1 100%);">
+                <span class="text-[6px] text-cyan-200 font-mono">375W</span>
+              </div>
+              <div class="w-[49px] h-[55px] bg-blue-950/90 border border-cyan-400/80 rounded-sm shadow-md flex items-center justify-center"
+                   style="transform: rotateX(-20deg); background: linear-gradient(135deg, #082f49 0%, #0369a1 100%);">
+                <span class="text-[6px] text-cyan-200 font-mono">375W</span>
+              </div>
+              <div class="w-[49px] h-[55px] bg-blue-950/90 border border-cyan-400/80 rounded-sm shadow-md flex items-center justify-center"
+                   style="transform: rotateX(-20deg); background: linear-gradient(135deg, #082f49 0%, #0369a1 100%);">
+                <span class="text-[6px] text-cyan-200 font-mono">375W</span>
+              </div>
+            </div>
+            <div class="absolute bottom-0.5 right-2 text-[7px] text-amber-300 font-mono font-bold">1.5kW 태양광 B군 (4매)</div>
+          </div>
+        </div>
+
+
+        <!-- ================= [레이어 7] 북측 모악산 원경 실루엣 패널 (해발 793m) ================= -->
+        <div class="preserve-3d absolute" style="width: 700px; height: 180px; left: -350px; top: -380px; transform: translateZ(20px) rotateX(90deg);">
+          <div class="face w-full h-full opacity-60 flex items-end justify-center pointer-events-none"
+               style="background: linear-gradient(to top, rgba(30,41,59,0.9), transparent);">
+            <svg viewBox="0 0 700 180" class="w-full h-full text-slate-700/70 fill-current">
+              <polygon points="0,180 120,60 210,120 320,30 430,90 560,40 700,180" />
+            </svg>
+            <div class="absolute top-8 text-xs text-slate-400 font-mono tracking-widest">모악산 (해발 793m) 북측 원경 조망 &uarr;</div>
+          </div>
+        </div>
+
+      </div><!-- //sceneRoot -->
+
+      <!-- 3D 뷰포트 내부 나침반 (Compass Gizmo) -->
+      <div class="absolute top-4 left-4 z-20 bg-slate-900/80 border border-slate-700/70 rounded-full p-2 w-14 h-14 flex items-center justify-center shadow-lg pointer-events-none">
+        <div id="compassNeedle" class="w-full h-full relative transition-transform duration-75">
+          <div class="absolute top-0 left-1/2 -translate-x-1/2 text-[9px] font-bold text-rose-500 font-mono">N</div>
+          <div class="absolute bottom-0 left-1/2 -translate-x-1/2 text-[9px] font-bold text-slate-400 font-mono">S</div>
+          <div class="absolute left-0 top-1/2 -translate-y-1/2 text-[9px] font-bold text-slate-400 font-mono">W</div>
+          <div class="absolute right-0 top-1/2 -translate-y-1/2 text-[9px] font-bold text-slate-400 font-mono">E</div>
+          <div class="absolute top-2 left-1/2 -translate-x-1/2 w-0.5 h-3 bg-rose-500"></div>
+          <div class="absolute bottom-2 left-1/2 -translate-x-1/2 w-0.5 h-3 bg-slate-500"></div>
+        </div>
+      </div>
+
+    </div><!-- //viewport3D -->
+
+    <!-- [컨트롤 바] 하단 인터랙션 컨트롤러 오버레이 -->
+    <div class="bg-slate-900/95 border-t border-slate-800 px-6 py-3 z-30 flex flex-wrap items-center justify-between gap-4">
+      
+      <!-- 좌측: 카메라 프리셋 앵글 퀵버튼 -->
+      <div class="flex items-center space-x-2">
+        <span class="text-xs text-slate-400 font-medium mr-1">카메라 앵글 프리셋:</span>
+        <button onclick="setCameraAngle(55, 45)" class="px-2.5 py-1 text-xs rounded bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 transition">
+          남서측 조감도 (기본)
+        </button>
+        <button onclick="setCameraAngle(35, 135)" class="px-2.5 py-1 text-xs rounded bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 transition">
+          중정 데크 포커스
+        </button>
+        <button onclick="setCameraAngle(30, 225)" class="px-2.5 py-1 text-xs rounded bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 transition">
+          모악산 등진 뷰
+        </button>
+        <button onclick="setCameraAngle(40, 315)" class="px-2.5 py-1 text-xs rounded bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 transition">
+          주차장 & 모닝 정면
+        </button>
+        <button onclick="setCameraAngle(85, 0)" class="px-2.5 py-1 text-xs rounded bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 transition">
+          배치도 평면 (Top)
+        </button>
+      </div>
+
+      <!-- 중앙: 자동 회전 토글 & 각도 인디케이터 -->
+      <div class="flex items-center space-x-3">
+        <button id="autoRotateBtn" onclick="toggleAutoRotate()" class="px-3 py-1 text-xs font-semibold rounded bg-cyan-700 hover:bg-cyan-600 text-white border border-cyan-500 shadow transition flex items-center gap-1.5">
+          <span id="autoRotateIcon">&#9654;</span>
+          <span id="autoRotateText">360° 자동 회전 시작</span>
+        </button>
+
+        <div class="text-[11px] font-mono text-slate-400 bg-slate-950/80 px-2.5 py-1 rounded border border-slate-800">
+          Pitch: <span id="pitchDisp" class="text-cyan-300">55°</span> | Yaw: <span id="yawDisp" class="text-cyan-300">45°</span> | Zoom: <span id="zoomDisp" class="text-cyan-300">1.0x</span>
+        </div>
+      </div>
+
+      <!-- 우측: 줌 슬라이더 & 일조 시간대 모드 -->
+      <div class="flex items-center space-x-4">
+        <!-- 줌 슬라이더 & 스텝 버튼 -->
+        <div class="flex items-center space-x-2">
+          <span class="text-xs text-slate-400">축척:</span>
+          <button onclick="stepZoom(-0.2)" class="w-5 h-5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center text-xs font-bold border border-slate-700 leading-none transition" title="축소">-</button>
+          <input type="range" id="zoomSlider" min="0.4" max="3.0" step="0.05" value="1.0" class="w-28 h-1.5 bg-slate-700 rounded-lg cursor-pointer" oninput="handleZoom(this.value)">
+          <button onclick="stepZoom(0.2)" class="w-5 h-5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center text-xs font-bold border border-slate-700 leading-none transition" title="확대">+</button>
+          <button onclick="resetZoom()" class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-[10px] text-cyan-300 border border-slate-700 transition" title="1.0x 기본 배율">1x</button>
+        </div>
+
+        <!-- 일조 시간대 토글 (주간/일몰/야간) -->
+        <div class="flex items-center space-x-1 bg-slate-950 p-0.5 rounded border border-slate-800 text-xs">
+          <button onclick="setTimeTheme('day')" id="btnDay" class="px-2 py-0.5 rounded bg-slate-800 text-amber-300 font-medium">
+            주간 (14:00)
+          </button>
+          <button onclick="setTimeTheme('sunset')" id="btnSunset" class="px-2 py-0.5 rounded text-slate-400 hover:text-white">
+            일몰 (18:30)
+          </button>
+          <button onclick="setTimeTheme('night')" id="btnNight" class="px-2 py-0.5 rounded text-slate-400 hover:text-white">
+            야간 (21:00)
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- [하단 서브 정보] 부지 및 건축 제원 기술 카드 (그리드 3열) -->
+    <div class="bg-slate-950/80 border-t border-slate-900 px-6 py-4 grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+      
+      <!-- 카드 1: 대지 및 지형 제원 -->
+      <div class="bg-slate-900/60 p-3 rounded border border-slate-800">
+        <div class="font-bold text-slate-200 mb-1 flex items-center justify-between">
+          <span>대지 및 부지 배치 (구이면 백여리)</span>
+          <span class="text-cyan-400 text-[10px]">계획관리지역 / 대 65평</span>
+        </div>
+        <ul class="text-slate-400 space-y-1">
+          <li>- 토지 매입: 2,470만 원 (평당 38만 원, 전액 무부채)</li>
+          <li>- 건축 점유: 동서 9.0m × 남북 8.5m (총 점유 면적 76.5㎡)</li>
+          <li>- 진입로: 남측 폭 4m 아스팔트 포장도로 접합 (우수/오폐수 인입 완료)</li>
+          <li>- 주차 패드: 3.5m × 5.0m 투수 블록 시공, 모닝 하이브리드 전용</li>
+        </ul>
+      </div>
+
+      <!-- 카드 2: 16.4평 므브테이너 구조 -->
+      <div class="bg-slate-900/60 p-3 rounded border border-slate-800">
+        <div class="font-bold text-slate-200 mb-1 flex items-center justify-between">
+          <span>건축 구조 (16.4평 평행 연동 모듈)</span>
+          <span class="text-cyan-400 text-[10px]">건축비 4,500만 원</span>
+        </div>
+        <ul class="text-slate-400 space-y-1">
+          <li>- 동 A(8.17평): D1 현관문, 자전거 전실, LDK 거실, 대형 주방, W2 3m 통창</li>
+          <li>- 동 B(8.17평): 퀸침대(1500x2000), 개발/유튜브 스튜디오, 호텔식 욕실</li>
+          <li>- 중정 데크: 2.5m × 6.8m(5.14평) 방킬라이 천연목 데크, 시선 100% 차단</li>
+          <li>- 연결 복도: 2.2m × 2.5m 150mm 패널벽 + W7 턴앤틸트 개폐창 (야외 도어 배제)</li>
+        </ul>
+      </div>
+
+      <!-- 카드 3: 에너지 및 자산 운용 체계 -->
+      <div class="bg-slate-900/60 p-3 rounded border border-slate-800">
+        <div class="font-bold text-slate-200 mb-1 flex items-center justify-between">
+          <span>에너지 자립 및 운용 체계</span>
+          <span class="text-cyan-400 text-[10px]">3kW 자가소비형 태양광</span>
+        </div>
+        <ul class="text-slate-400 space-y-1">
+          <li>- 발전량: 375W 양면형 패널 8매(동A 4매, 동B 4매), 월평균 330kWh</li>
+          <li>- 전기요금: 연평균 월 1.5만 원 미만 유지 (인버터 스마트 상계거래)</li>
+          <li>- 자산 운용: SATA 주식 DRIP + 코인 4종(BTC/ETH/SOL/XRP) 45만 + 저축 85만</li>
+          <li>- 라이프: 화/금 송천동 40km 라이딩, 주 2회 앱 개발 및 유튜브 기록</li>
+        </ul>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- 인터랙션 스크립트 -->
+  <script>
+    // 카메라 상태 변수
+    let pitch = 55;  // X축 회전 (15deg ~ 85deg 제한)
+    let yaw = 45;    // Z축 회전 (360도 방위각)
+    let zoom = 1.0;  // 씬 확대/축소 배율
+    
+    // 드래그 제어 변수
+    let isDragging = false;
+    let startX = 0;
+    let startY = 0;
+    let startPitch = 55;
+    let startYaw = 45;
+
+    // 자동 회전 루프 변수
+    let isAutoRotating = false;
+    let autoRotateFrameId = null;
+
+    const viewport = document.getElementById('viewport3D');
+    const scene = document.getElementById('sceneRoot');
+    const compass = document.getElementById('compassNeedle');
+    const pitchDisp = document.getElementById('pitchDisp');
+    const yawDisp = document.getElementById('yawDisp');
+    const zoomDisp = document.getElementById('zoomDisp');
+    const zoomSlider = document.getElementById('zoomSlider');
+    const autoRotateBtn = document.getElementById('autoRotateBtn');
+    const autoRotateText = document.getElementById('autoRotateText');
+    const autoRotateIcon = document.getElementById('autoRotateIcon');
+
+    // 씬 변환 적용 함수
+    function updateTransform(smooth = false) {
+      if (smooth) {
+        scene.classList.add('smooth-transition');
+        setTimeout(() => scene.classList.remove('smooth-transition'), 600);
+      }
+      scene.style.transform = `rotateX(${pitch}deg) rotateZ(${yaw}deg) scale(${zoom})`;
+      
+      // 나침반 연동 (씬 회전에 반대로 회전하여 항상 북쪽 유지)
+      if (compass) {
+        compass.style.transform = `rotate(${-yaw}deg)`;
+      }
+
+      // 수치 디스플레이 업데이트
+      if (pitchDisp) pitchDisp.textContent = `${Math.round(pitch)}°`;
+      if (yawDisp) yawDisp.textContent = `${Math.round(((yaw % 360) + 360) % 360)}°`;
+      if (zoomDisp) zoomDisp.textContent = `${zoom.toFixed(2)}x`;
+    }
+
+    // 마우스 이벤트 바인딩
+    viewport.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      startX = e.clientX;
+      startY = e.clientY;
+      startPitch = pitch;
+      startYaw = yaw;
+      if (isAutoRotating) stopAutoRotate();
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+      const deltaX = e.clientX - startX;
+      const deltaY = e.clientY - startY;
+
+      // 좌우: 정방향(-deltaX), 상하: 반전(-deltaY, 위로 드래그 시 조감 뷰)
+      yaw = (startYaw - deltaX * 0.45);
+      pitch = Math.max(15, Math.min(85, startPitch - deltaY * 0.35));
+
+      updateTransform(false);
+    });
+
+    window.addEventListener('mouseup', () => {
+      isDragging = false;
+    });
+
+    // 터치 모바일 제스처 지원
+    viewport.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 1) {
+        isDragging = true;
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+        startPitch = pitch;
+        startYaw = yaw;
+        if (isAutoRotating) stopAutoRotate();
+      }
+    }, { passive: true });
+
+    window.addEventListener('touchmove', (e) => {
+      if (!isDragging || e.touches.length !== 1) return;
+      const deltaX = e.touches[0].clientX - startX;
+      const deltaY = e.touches[0].clientY - startY;
+
+      // 좌우: 정방향(-deltaX), 상하: 반전(-deltaY, 위로 드래그 시 조감 뷰)
+      yaw = (startYaw - deltaX * 0.45);
+      pitch = Math.max(15, Math.min(85, startPitch - deltaY * 0.35));
+      updateTransform(false);
+    }, { passive: true });
+
+    window.addEventListener('touchend', () => {
+      isDragging = false;
+    });
+
+    // 휠 줌 제어 (최소 0.4x ~ 최대 3.0x 대폭 확장)
+    viewport.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const zoomDelta = e.deltaY * -0.001;
+      zoom = Math.max(0.4, Math.min(3.0, zoom + zoomDelta));
+      zoomSlider.value = zoom;
+      updateTransform(false);
+    }, { passive: false });
+
+    // 줌 슬라이더 핸들러
+    function handleZoom(val) {
+      zoom = parseFloat(val);
+      updateTransform(false);
+    }
+
+    // 줌 버튼 핸들러 (+/- 스텝 및 1x 리셋)
+    function stepZoom(delta) {
+      zoom = Math.max(0.4, Math.min(3.0, zoom + delta));
+      zoomSlider.value = zoom;
+      updateTransform(false);
+    }
+
+    function resetZoom() {
+      zoom = 1.0;
+      zoomSlider.value = 1.0;
+      updateTransform(true);
+    }
+
+    // 카메라 프리셋 이동
+    function setCameraAngle(targetPitch, targetYaw) {
+      if (isAutoRotating) stopAutoRotate();
+      pitch = targetPitch;
+      yaw = targetYaw;
+      updateTransform(true);
+    }
+
+    // 360도 자동 회전 루프
+    function autoRotateLoop() {
+      if (!isAutoRotating) return;
+      yaw = (yaw + 0.3) % 360;
+      updateTransform(false);
+      autoRotateFrameId = requestAnimationFrame(autoRotateLoop);
+    }
+
+    function startAutoRotate() {
+      isAutoRotating = true;
+      autoRotateBtn.classList.remove('bg-cyan-700', 'hover:bg-cyan-600');
+      autoRotateBtn.classList.add('bg-rose-700', 'hover:bg-rose-600');
+      autoRotateText.textContent = "회전 일시 정지";
+      autoRotateIcon.innerHTML = "&#10074;&#10074;";
+      autoRotateFrameId = requestAnimationFrame(autoRotateLoop);
+    }
+
+    function stopAutoRotate() {
+      isAutoRotating = false;
+      if (autoRotateFrameId) {
+        cancelAnimationFrame(autoRotateFrameId);
+        autoRotateFrameId = null;
+      }
+      autoRotateBtn.classList.remove('bg-rose-700', 'hover:bg-rose-600');
+      autoRotateBtn.classList.add('bg-cyan-700', 'hover:bg-cyan-600');
+      autoRotateText.textContent = "360° 자동 회전 시작";
+      autoRotateIcon.innerHTML = "&#9654;";
+    }
+
+    function toggleAutoRotate() {
+      if (isAutoRotating) {
+        stopAutoRotate();
+      } else {
+        startAutoRotate();
+      }
+    }
+
+    // 시간대 조명 테마 변경
+    function setTimeTheme(mode) {
+      const body = document.getElementById('mainBody');
+      const btnDay = document.getElementById('btnDay');
+      const btnSunset = document.getElementById('btnSunset');
+      const btnNight = document.getElementById('btnNight');
+
+      const winA1 = document.getElementById('winA1');
+      const winB1 = document.getElementById('winB1');
+      const winB2 = document.getElementById('winB2');
+      const winBreezeway = document.getElementById('winBreezeway');
+      const carLightL = document.getElementById('carLightL');
+      const carLightR = document.getElementById('carLightR');
+
+      body.classList.remove('theme-day', 'theme-sunset', 'theme-night');
+      btnDay.className = "px-2 py-0.5 rounded text-slate-400 hover:text-white";
+      btnSunset.className = "px-2 py-0.5 rounded text-slate-400 hover:text-white";
+      btnNight.className = "px-2 py-0.5 rounded text-slate-400 hover:text-white";
+
+      if (mode === 'day') {
+        body.classList.add('theme-day');
+        btnDay.className = "px-2 py-0.5 rounded bg-slate-800 text-amber-300 font-medium";
+        winA1.style.backgroundColor = "rgba(8, 47, 73, 0.7)";
+        winB1.style.backgroundColor = "rgba(8, 47, 73, 0.7)";
+        winB2.style.backgroundColor = "rgba(49, 46, 129, 0.8)";
+        if (winBreezeway) winBreezeway.style.backgroundColor = "rgba(8, 47, 73, 0.8)";
+        carLightL.style.boxShadow = "none";
+        carLightR.style.boxShadow = "none";
+      } else if (mode === 'sunset') {
+        body.classList.add('theme-sunset');
+        btnSunset.className = "px-2 py-0.5 rounded bg-slate-800 text-amber-400 font-medium";
+        winA1.style.backgroundColor = "rgba(245, 158, 11, 0.6)";
+        winB1.style.backgroundColor = "rgba(245, 158, 11, 0.5)";
+        winB2.style.backgroundColor = "rgba(99, 102, 241, 0.8)";
+        if (winBreezeway) winBreezeway.style.backgroundColor = "rgba(245, 158, 11, 0.5)";
+        carLightL.style.boxShadow = "0 0 10px #fbbf24";
+        carLightR.style.boxShadow = "0 0 10px #fbbf24";
+      } else if (mode === 'night') {
+        body.classList.add('theme-night');
+        btnNight.className = "px-2 py-0.5 rounded bg-slate-800 text-sky-400 font-medium";
+        // 야간에는 거실 전구색 발광 & 개발실 블루 모니터 발광 & 복도 은은한 전구색
+        winA1.style.backgroundColor = "rgba(251, 191, 36, 0.85)";
+        winA1.style.boxShadow = "0 0 25px rgba(251, 191, 36, 0.8)";
+        winB1.style.backgroundColor = "rgba(251, 191, 36, 0.6)";
+        winB2.style.backgroundColor = "rgba(56, 189, 248, 0.95)";
+        winB2.style.boxShadow = "0 0 30px rgba(56, 189, 248, 0.9)";
+        if (winBreezeway) {
+          winBreezeway.style.backgroundColor = "rgba(251, 191, 36, 0.75)";
+          winBreezeway.style.boxShadow = "0 0 15px rgba(251, 191, 36, 0.6)";
+        }
+        carLightL.style.boxShadow = "0 0 15px #fef08a";
+        carLightR.style.boxShadow = "0 0 15px #fef08a";
+      }
+    }
+
+    // 초기화
+    updateTransform(false);
+  </script>
+</body>
+</html>

@@ -54,24 +54,22 @@
 
 ---
 
-## 4. 핵심 파일 및 디렉터리 구조
+## 4. 핵심 파일 및 디렉터리 구조 (SSOT 체계)
 
 ```
 my-virtual-life/
 ├── viewers/
-│   ├── index.html                        # 5대 뷰어 통합 포털 (내비게이션)
+│   ├── index.html                        # 4대 뷰어 통합 포털 (내비게이션)
 │   ├── mvtainer_fps_walkthrough.html     # [2단계 개편 대상] 1:1 치수 3D 1인칭 워크스루
 │   ├── mvtainer_architecture.html        # [2단계 개편 대상] 2D SVG 건축 평면도 (사선 지적도 반영)
 │   ├── gui_site_completion_viewer.html   # [2단계 개편 대상] 덕천리 477-1 부지 완성 조감도
-│   ├── breezeway_alternative1_preview.html # 연결복도 참조 프리뷰
 │   └── jeonju_land_map.html              # [2단계 개편 대상] 덕천리 477-1·9,360만 원 예산 반영
-├── FINANCIAL_SIMULATION.md               # 덕천리 477-1 기준 9,360만 원·20년 시뮬레이션 (1단계 완료)
-├── VIRTUAL_LIFE_PROFILE.md               # 2인 공동거주·세컨하우스·ㅡ자형 스펙 (1단계 완료)
-├── ROADMAP_AND_STEPS.md                  # Phase 1~3·Step 1~6 마일스톤 (1단계 완료)
-├── SPORTS_TIER_AND_GOALS.md              # 러닝/사이클링 티어 체계 및 훈련 갭 분석
-├── WEEKLY_LIFESTYLE_ROUTINE.md           # 주간 168시간 시간표 및 라이프 루틴
-├── HANDOVER.md                           # [본 문서] 프로젝트 공식 인수인계서 (갱신 완료)
-└── session_id.txt                        # 세션 메타데이터, 최신 현황 및 에이전트 가이드 (갱신 완료)
+├── FINANCIAL_SIMULATION.md               # [재정 SSOT] 9,360만 집행 및 20년 복리 시뮬레이션
+├── VIRTUAL_LIFE_PROFILE.md               # [라이프 SSOT] 2인 거주 페르소나 및 라이프스타일 마스터
+├── ROADMAP_AND_STEPS.md                  # [실행 대시보드] Phase 1~3 마일스톤 및 Step 1~6 트래커
+├── SPORTS_TIER_AND_GOALS.md              # [스포츠 SSOT] 러닝/사이클링 1~5단계 등급표 및 훈련 갭 분석
+├── WEEKLY_LIFESTYLE_ROUTINE.md           # [일과 SSOT] 주간 168시간 시간표 및 라이프 루틴
+└── HANDOVER.md                           # [본 문서 / 인수인계 SSOT] 공식 인수인계 및 건축 규격서
 ```
 
 ---

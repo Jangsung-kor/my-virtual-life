@@ -8,8 +8,8 @@
 
 | 단계 | 기간 / 나이 | 핵심 과제 및 상태 | 참조 기준 문서 |
 | :--- | :--- | :--- | :--- |
-| **Phase 1** | **1~24개월** | **[설계 확정 / 구축 완료]**<br>- 본인 단독 9,360만 원(부채 0%) 전액 집행 완료<br>- 완주 구이 덕천리 477-1 대지(63.53평, 계획관리) 매입 및 ㅡ자형 16.4평 므브테이너 확정<br>- 시작 시점부터 2인 공동 거주(여자친구 사립학교 급식 영양사)<br>- 차량 구매 전 세컨하우스 2단계 입주 전략 가동 | [`FINANCIAL_SIMULATION.md`](file:///e:/github/my-virtual-life/FINANCIAL_SIMULATION.md)<br>[`HANDOVER.md`](file:///e:/github/my-virtual-life/HANDOVER.md) |
-| **Phase 2** | **25~120개월**<br>(35세~43세) | **[현재 진행 단계]**<br>- 월 390만 원 4대 배분 집행 (소비 130 / 저축 85 / 코인 45 / SATA 130+DRIP)<br>- 게으름 방지 앵커: 구이 ↔ 송천동 왕복 40km 주 2회 라이딩<br>- 스포츠 숙련도 레벨업 (2단계 초급 ➔ 3단계 중수 달성)<br>- 10년 차(43세): SATA 1,582주 + 순수 현금 8,187만 + 코인 4,320만 원 완성 | [`FINANCIAL_SIMULATION.md`](file:///e:/github/my-virtual-life/FINANCIAL_SIMULATION.md)<br>[`SPORTS_TIER_AND_GOALS.md`](file:///e:/github/my-virtual-life/SPORTS_TIER_AND_GOALS.md)<br>[`WEEKLY_LIFESTYLE_ROUTINE.md`](file:///e:/github/my-virtual-life/WEEKLY_LIFESTYLE_ROUTINE.md) |
+| **Phase 1** | **1~24개월** | **[설계 확정 / 구축 완료]**<br>- 본인 단독 9,360만 원(부채 0%) 전액 집행 완료<br>- 완주 구이 덕천리 477-1 대지(63.53평, 계획관리) 매입 및 10평 경량 목조주택(다락 포함 실사용 14평, 4,000만 원) 확정<br>- 시작 시점부터 2인 공동 거주(여자친구 사립학교 급식 영양사)<br>- 차량 구매 전 세컨하우스 2단계 입주 전략 가동 | [`FINANCIAL_SIMULATION.md`](file:///e:/github/my-virtual-life/FINANCIAL_SIMULATION.md)<br>[`HANDOVER.md`](file:///e:/github/my-virtual-life/HANDOVER.md) |
+| **Phase 2** | **25~120개월**<br>(35세~43세) | **[현재 진행 단계]**<br>- 월 390만 원 4대 배분 집행 (소비 130 / 저축 85 / 코인 45 / SATA 130+DRIP)<br>- 게으름 방지 앵커: 구이 ↔ 송천동 왕복 40km 주 2회 라이딩<br>- 스포츠 숙련도 레벨업 (2단계 초급 ➔ 3단계 중수 달성)<br>- 10년 차(43세): SATA 1,582주 + 순수 현금 8,337만 + 코인 4,320만 원 완성 | [`FINANCIAL_SIMULATION.md`](file:///e:/github/my-virtual-life/FINANCIAL_SIMULATION.md)<br>[`SPORTS_TIER_AND_GOALS.md`](file:///e:/github/my-virtual-life/SPORTS_TIER_AND_GOALS.md)<br>[`WEEKLY_LIFESTYLE_ROUTINE.md`](file:///e:/github/my-virtual-life/WEEKLY_LIFESTYLE_ROUTINE.md) |
 | **Phase 3** | **121~240개월**<br>(43세~53세) | **[10년 자립 50:50 배당 분할 운용기]**<br>- 연금 종료 후 SATA 월 배당금으로 생활비 50% 소비 / 50% 복리 재투자<br>- 53세 최종: SATA 약 3,000주(월 배당 420.5만 원)로 평생 자생 엔진 완성 | [`FINANCIAL_SIMULATION.md`](file:///e:/github/my-virtual-life/FINANCIAL_SIMULATION.md) |
 
 ---
@@ -29,9 +29,9 @@
 
 | 과제 번호 | 과제명 | 진행 상태 | 세부 내용 및 계획 |
 | :--- | :--- | :--- | :--- |
-| **Step 1** | **부지 및 주택 아키텍처** | **설계 확정**<br>*(뷰어 개편 예정)* | 완주 구이 덕천리 477-1 대지(210㎡) 및 ㅡ자형 16.4평(20m×3m) 스펙 확정. 2D/3D 비주얼 뷰어 4종 순차 개편 예정. |
+| **Step 1** | **부지 및 주택 아키텍처** | **설계 확정**<br>*(뷰어 개편 예정)* | 완주 구이 덕천리 477-1 대지(210㎡) 및 10평 경량 목조주택(다락 포함 실사용 약 14평, 4,000만 원) 스펙 확정. 2D/3D 비주얼 뷰어 순차 개편 예정. |
 | **Step 2** | **모빌리티 및 2단계 입주** | **확정 완료** | 차량 구매 전까지 도심 거점 출퇴근 병행 세컨하우스 우선 운영 ➔ 모닝 하이브리드 중고 일시불 매입 후 완전 전입. |
 | **Step 3** | **게으름 방지 앵커 & 프로덕트** | **운영 확정** | 송천동 부모님 가게 왕복 40km 주 2회 라이딩 + `cycling-stamp.web.app` 실전 테스트 및 지속 개발. |
 | **Step 4** | **유튜브-프로덕트 플라이휠** | **기획 확정** | 유튜브 채널("전주 근교 므브테이너 자립 라이프 & 중수 성장기")을 통한 앱 자연 유입 및 유저 피드백 루프 가동. |
 | **Step 5** | **퇴사 후 소비 버짓팅 상세화** | **차기 과제** | 세컨하우스 운영기 및 완전 전입 이후 기준 월 130만 원 소비(식비, 공과금, 장비 유지비) 세부 파이차트 명세화. |
-| **Step 6** | **2인 공동 거주 내부 최적화** | **확정 완료** | 16.4평 무증축 내부 최적화: 복도 직결 3분리 욕실, 1,800mm 대면 아일랜드, 2,400mm 2인 동시 PC 확장 데스크 + 1,000mm 드레스룸, 침실 더블 스터드 차음벽. |
+| **Step 6** | **2인 공동 거주 내부 최적화** | **확정 완료** | 10평 목조 1층(LDK, 1,500mm 아일랜드, 1,800mm 코딩 데스크, 콤팩트 건식 욕실, 계단 하부 수납) + 복층 다락 4평 퀸 수면존 최적화로 2인 생활 동선 충돌 제로화. |

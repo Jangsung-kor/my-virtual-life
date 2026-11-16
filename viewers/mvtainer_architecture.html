@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>므브테이너 16.4평 확정 상세 설계도 및 창호/도어 배치 (정밀 치수 검증)</title>
+  <title>10평 경량 목조주택(실사용 14평) 및 므브테이너 정축척 평면도 & 치수 명세</title>
   <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
   <style>
     :root {
@@ -35,21 +35,24 @@
           <a href="index.html" class="text-xs px-2.5 py-1 rounded bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-700 transition">
             &larr; 통합 허브
           </a>
-          <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-800">정밀 1:1 축척 검증도</span>
-          <h2 class="text-white font-bold text-lg">므브테이너 16.4평 정축척 평면도 & 치수 명세</h2>
+          <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-800">10평 목조 확정 설계</span>
+          <h2 class="text-white font-bold text-lg">10평 경량 목조주택 정축척 평면도 & 다락 치수 명세</h2>
         </div>
         <p class="text-slate-400 text-xs mt-1">
-          실측 비례 3:1(폭 3,000mm × 길이 9,000mm) 정상화 | 퀸 침대(1,500×2,000)·1,800mm 데스크·창호/도어 전수 치수선 반영
+          완주 구이 덕천리 477-1 부지 | 1층 10평(33㎡) LDK·코딩·위생 + 복층 다락 4평(13㎡) 퀸 수면존 | 패널라이징 현장시공(골목길 진입 100% 보장) | 부가세 포함 4,000만 원
         </p>
       </div>
 
       <!-- View Switch -->
       <div class="inline-flex rounded-lg border border-[var(--border)] p-1 bg-[#070d19] text-xs">
-        <button id="btnViewPlan" onclick="switchView('plan')" class="px-3 py-1.5 rounded font-medium transition-all bg-blue-600 text-white shadow-sm">
-          1인 기본 평면도
+        <button id="btnViewWood10P" onclick="switchView('wood10p')" class="px-3 py-1.5 rounded font-medium transition-all bg-emerald-600 text-white shadow-sm">
+          ★ [확정] 10평 목조 (1층+다락)
         </button>
         <button id="btnViewPlan2P" onclick="switchView('plan2p')" class="px-3 py-1.5 rounded font-medium transition-all text-slate-400 hover:text-white">
-          2인 최적화 평면도 (시나리오 1)
+          2인 최적화 16.4평 (참조)
+        </button>
+        <button id="btnViewPlan" onclick="switchView('plan')" class="px-3 py-1.5 rounded font-medium transition-all text-slate-400 hover:text-white">
+          1인 기본 평면도 (참조)
         </button>
         <button id="btnViewConcept" onclick="switchView('concept')" class="px-3 py-1.5 rounded font-medium transition-all text-slate-400 hover:text-white">
           중정 데크 구조 원리
@@ -60,8 +63,275 @@
     <!-- Main Visual Canvas Area -->
     <div class="bg-[var(--background)] border border-[var(--border)] rounded-xl p-4 flex flex-col items-center justify-center relative overflow-hidden">
       
+      <!-- 0. ★ [확정] 10평형 경량 목조주택 (1층 10평 + 복층 다락 4평 = 실사용 14평) -->
+      <div id="viewContainerWood10P" class="w-full flex flex-col items-center">
+        <div class="w-full flex justify-between items-center text-xs text-slate-400 mb-3 px-2">
+          <span class="font-semibold text-white flex items-center gap-2">
+            <span class="text-emerald-400 font-bold">1층 10평(33.0㎡) + 복층 다락 4평(13.2㎡) = 총 실사용 14평(46.2㎡)</span>
+            <span class="text-[11px] text-cyan-400 font-mono">[축척 1:15 / 1m = 65px]</span>
+          </span>
+          <div class="flex items-center gap-3 text-[11px] font-mono">
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 bg-emerald-500 rounded-sm inline-block"></span> D1 방화문 / D2 중문</span>
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 bg-sky-400 rounded-sm inline-block"></span> 시스템 창호 (W1~W3)</span>
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 bg-amber-600 rounded-sm inline-block"></span> 방킬라이 남향 데크</span>
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 bg-purple-500 rounded-sm inline-block"></span> 복층 퀸 수면존</span>
+          </div>
+        </div>
+
+        <!-- SVG 뷰박스: 960 x 740 -->
+        <svg viewBox="0 0 960 740" class="w-full h-auto select-none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="woodArrowStart" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+              <path d="M5,0 L5,6 L0,3 z" fill="#94a3b8" />
+            </marker>
+            <marker id="woodArrowEnd" markerWidth="6" markerHeight="6" refX="1" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L5,3 z" fill="#94a3b8" />
+            </marker>
+            <marker id="woodArrowCyanStart" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+              <path d="M5,0 L5,6 L0,3 z" fill="#38bdf8" />
+            </marker>
+            <marker id="woodArrowCyanEnd" markerWidth="6" markerHeight="6" refX="1" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L5,3 z" fill="#38bdf8" />
+            </marker>
+            <marker id="woodArrowGreenStart" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+              <path d="M5,0 L5,6 L0,3 z" fill="#34d399" />
+            </marker>
+            <marker id="woodArrowGreenEnd" markerWidth="6" markerHeight="6" refX="1" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L5,3 z" fill="#34d399" />
+            </marker>
+            <pattern id="woodDeckPattern" width="12" height="12" patternUnits="userSpaceOnUse">
+              <rect width="12" height="12" fill="#451a03" fill-opacity="0.3"/>
+              <line x1="0" y1="0" x2="0" y2="12" stroke="#92400e" stroke-width="1.2" opacity="0.6"/>
+              <line x1="6" y1="0" x2="6" y2="12" stroke="#78350f" stroke-width="0.8" opacity="0.4"/>
+            </pattern>
+          </defs>
+
+          <!-- ================= [1] 1층 평면도 (GROUND FLOOR: 8,250 × 4,000mm = 33.0㎡ / 10.0평) ================= -->
+          <text x="60" y="45" fill="#38bdf8" font-size="13" font-weight="bold">【1층 본체 평면도】 8,250 × 4,000 mm (바닥면적 10.0평 / 33.0㎡)</text>
+          <text x="330" y="45" fill="#94a3b8" font-size="11">LDK 거실 & 주방 · 1,800mm 코딩 데스크 · 건식 욕실 · 계단 하부 워시타워</text>
+
+          <!-- 상단 외곽 치수선 (8,250mm) -->
+          <line x1="60" y1="58" x2="596" y2="58" class="dim-solid" marker-start="url(#woodArrowCyanStart)" marker-end="url(#woodArrowCyanEnd)"/>
+          <line x1="60" y1="50" x2="60" y2="70" class="dim-line"/>
+          <line x1="596" y1="50" x2="596" y2="70" class="dim-line"/>
+          <text x="328" y="53" text-anchor="middle" fill="#38bdf8" font-size="10" font-family="monospace" font-weight="bold">본체 총 길이: 8,250 mm (패널라이징 목구조 외벽 150mm)</text>
+
+          <!-- 좌측 세로 치수선 (4,000mm) -->
+          <line x1="42" y1="70" x2="42" y2="330" class="dim-solid" marker-start="url(#woodArrowCyanStart)" marker-end="url(#woodArrowCyanEnd)"/>
+          <line x1="35" y1="70" x2="60" y2="70" class="dim-line"/>
+          <line x1="35" y1="330" x2="60" y2="330" class="dim-line"/>
+          <text x="34" y="200" text-anchor="middle" fill="#38bdf8" font-size="10" font-family="monospace" font-weight="bold" transform="rotate(-90 34 200)">본체 폭: 4,000 mm</text>
+
+          <!-- 1층 외벽 프레임 (외경 536 × 260px) -->
+          <rect x="60" y="70" width="536" height="260" rx="4" fill="#0d1829" stroke="#38bdf8" stroke-width="2.5"/>
+          <rect x="70" y="80" width="516" height="240" fill="#091221" stroke="#334155" stroke-width="1.2"/>
+
+          <!-- 1) 서측 현관 클린존 (X: 70 ~ 175, Y: 185 ~ 320) -->
+          <rect x="70" y="185" width="105" height="135" fill="#1e293b" fill-opacity="0.3"/>
+          <!-- D1 주출입 방화문 (서측, 폭 900mm -> 58px) -->
+          <line x1="60" y1="210" x2="60" y2="268" stroke="#10b981" stroke-width="6"/>
+          <text x="50" y="240" text-anchor="middle" fill="#10b981" font-size="8" font-weight="bold" transform="rotate(-90 50 240)">D1 현관문</text>
+          
+          <!-- 인피자 이노사이클 18 자전거 실내 벽걸이 거치대 -->
+          <rect x="80" y="280" width="85" height="22" rx="3" fill="#06b6d4" fill-opacity="0.3" stroke="#0891b2" stroke-width="1.2"/>
+          <circle cx="95" cy="291" r="7" fill="none" stroke="#0891b2"/>
+          <circle cx="150" cy="291" r="7" fill="none" stroke="#0891b2"/>
+          <line x1="95" y1="291" x2="150" y2="291" stroke="#0891b2" stroke-width="1.5"/>
+          <text x="122" y="295" text-anchor="middle" fill="#a5f3fc" font-size="7" font-weight="bold">인피자 자전거 벽걸이</text>
+
+          <!-- 2인 전면 신발장 (1,200 × 400mm) -->
+          <rect x="80" y="192" width="28" height="75" rx="2" fill="#334155" stroke="#475569"/>
+          <text x="94" y="233" text-anchor="middle" fill="#cbd5e1" font-size="7" transform="rotate(-90 94 233)">신발장</text>
+
+          <!-- D2 3연동 슬라이딩 중문 (폭 1,200mm -> 78px) -->
+          <line x1="175" y1="200" x2="175" y2="278" stroke="#10b981" stroke-width="4"/>
+          <text x="183" y="242" fill="#10b981" font-size="8" font-weight="bold">D2 중문</text>
+
+          <!-- 2) 콤팩트 호텔식 건식 분리 욕실 (북서측 X: 70 ~ 175, Y: 80 ~ 185) -->
+          <line x1="70" y1="185" x2="175" y2="185" stroke="#475569" stroke-width="2"/>
+          <rect x="70" y="80" width="105" height="105" fill="#0369a1" fill-opacity="0.15"/>
+          
+          <!-- 건식 세면대 카운터 (900 × 550mm -> 58 × 35px) -->
+          <rect x="75" y="86" width="58" height="35" rx="2" fill="#1e293b" stroke="#38bdf8" stroke-width="1.2"/>
+          <circle cx="104" cy="103" r="10" fill="#0f172a" stroke="#0ea5e9"/>
+          <text x="104" y="130" text-anchor="middle" fill="#bae6fd" font-size="7">건식 세면대</text>
+
+          <!-- 독립 양변기실 (700 × 1,000mm) -->
+          <rect x="135" y="86" width="36" height="55" rx="2" fill="#082f49" stroke="#0284c7"/>
+          <rect x="142" y="96" width="22" height="34" rx="5" fill="#ffffff"/>
+          <text x="153" y="148" text-anchor="middle" fill="#e0f2fe" font-size="7">양변기</text>
+
+          <!-- 독립 샤워부스 (900 × 900mm) -->
+          <rect x="75" y="135" width="58" height="46" rx="2" fill="#0c4a6e" stroke="#38bdf8" stroke-width="1.2"/>
+          <circle cx="104" cy="158" r="8" fill="none" stroke="#38bdf8" stroke-width="1.5"/>
+          <text x="104" y="176" text-anchor="middle" fill="#bae6fd" font-size="7" font-weight="bold">샤워부스</text>
+
+          <!-- 3) LDK 거실 & 주방 (중앙 X: 175 ~ 380) -->
+          <!-- 싱크대 & 2구 인덕션 카운터 (2,100 × 600mm -> 136 × 39px) -->
+          <rect x="188" y="86" width="136" height="39" rx="2" fill="#1e293b" stroke="#475569" stroke-width="1"/>
+          <rect x="195" y="90" width="38" height="28" rx="2" fill="#0f172a" stroke="#0284c7"/>
+          <circle cx="214" cy="104" r="7" fill="#0284c7" fill-opacity="0.3"/>
+          <rect x="245" y="92" width="28" height="24" rx="2" fill="#0f172a" stroke="#ef4444"/>
+          <circle cx="253" cy="104" r="4" fill="#ef4444" fill-opacity="0.4"/>
+          <circle cx="265" cy="104" r="4" fill="#ef4444" fill-opacity="0.4"/>
+          <rect x="290" y="86" width="34" height="39" rx="2" fill="#0f172a" stroke="#38bdf8"/>
+          <text x="307" y="108" text-anchor="middle" fill="#94a3b8" font-size="7">냉장고</text>
+          <text x="214" y="134" text-anchor="middle" fill="#e2e8f0" font-size="7">싱크대</text>
+          <text x="259" y="134" text-anchor="middle" fill="#fca5a5" font-size="7">인덕션</text>
+
+          <!-- ★ 1,500mm 실속 다이닝 아일랜드 바 (1,500 × 750mm -> 98 × 48px) -->
+          <rect x="195" y="145" width="98" height="48" rx="3" fill="#78350f" stroke="#d97706" stroke-width="1.5"/>
+          <!-- 바 스툴 2개 -->
+          <circle cx="225" cy="208" r="9" fill="#1e293b" stroke="#d97706" stroke-width="1.2"/>
+          <circle cx="265" cy="208" r="9" fill="#1e293b" stroke="#d97706" stroke-width="1.2"/>
+          <text x="244" y="168" text-anchor="middle" fill="#fef3c7" font-size="8" font-weight="bold">1,500mm 아일랜드 식탁 바</text>
+          <text x="244" y="180" text-anchor="middle" fill="#fbbf24" font-size="7">2인 마주보기 식사 + 하부 수납</text>
+
+          <!-- 2인 패브릭 소파 (1,600 × 800mm -> 104 × 52px) -->
+          <rect x="295" y="240" width="85" height="48" rx="4" fill="#1d4ed8" fill-opacity="0.4" stroke="#3b82f6" stroke-width="1.2"/>
+          <text x="337" y="268" text-anchor="middle" fill="#bfdbfe" font-size="8" font-weight="bold">2인 소파</text>
+
+          <!-- 벽걸이 TV (65인치) -->
+          <rect x="195" y="318" width="75" height="4" fill="#0284c7"/>
+          <text x="232" y="312" text-anchor="middle" fill="#38bdf8" font-size="7">65" 스마트 TV</text>
+
+          <!-- 남향 W1 파노라마 통창 (2,400 × 2,000mm -> 폭 156px) -->
+          <line x1="260" y1="330" x2="380" y2="330" stroke="#38bdf8" stroke-width="5"/>
+          <text x="320" y="342" text-anchor="middle" fill="#38bdf8" font-size="8" font-weight="bold">W1 (남향 파노라마창 2400×2000)</text>
+
+          <!-- 4) 계단실 및 하부 워시타워 매립 (X: 335 ~ 385, Y: 80 ~ 215) -->
+          <rect x="335" y="86" width="45" height="125" fill="#1e1b4b" fill-opacity="0.25" stroke="#a855f7" stroke-width="1.2"/>
+          <line x1="335" y1="105" x2="380" y2="105" stroke="#a855f7" stroke-width="1"/>
+          <line x1="335" y1="125" x2="380" y2="125" stroke="#a855f7" stroke-width="1"/>
+          <line x1="335" y1="145" x2="380" y2="145" stroke="#a855f7" stroke-width="1"/>
+          <line x1="335" y1="165" x2="380" y2="165" stroke="#a855f7" stroke-width="1"/>
+          <line x1="335" y1="185" x2="380" y2="185" stroke="#a855f7" stroke-width="1"/>
+          <text x="357" y="150" text-anchor="middle" fill="#c084fc" font-size="8" font-weight="bold" transform="rotate(-90 357 150)">다락 계단 ▲ (폭 750)</text>
+          
+          <!-- 계단 하부 세탁·건조기 워시타워 매립 (700 × 700mm) -->
+          <rect x="335" y="86" width="45" height="42" fill="#0f172a" stroke="#a855f7" stroke-width="1.5"/>
+          <circle cx="357" cy="107" r="12" fill="#1e1b4b" stroke="#38bdf8"/>
+          <text x="357" y="110" text-anchor="middle" fill="#38bdf8" font-size="6">워시타워</text>
+
+          <!-- 5) 독립 개발 작업실 (동측 X: 385 ~ 586) -->
+          <line x1="385" y1="80" x2="385" y2="320" stroke="#475569" stroke-width="2"/>
+          <rect x="385" y="80" width="201" height="240" fill="#4c1d95" fill-opacity="0.15"/>
+
+          <!-- 북측 벽면 1,800mm 코딩 확장 데스크 (1,800 × 800mm -> 118 × 52px) -->
+          <rect x="400" y="86" width="118" height="52" rx="3" fill="#1e1b4b" stroke="#8b5cf6" stroke-width="1.5"/>
+          <!-- 본인 듀얼 모니터 개발 존 (1,100mm) -->
+          <rect x="410" y="89" width="30" height="7" rx="1" fill="#0f172a" stroke="#38bdf8"/>
+          <rect x="444" y="89" width="30" height="7" rx="1" fill="#0f172a" stroke="#38bdf8"/>
+          <!-- 여자친구 노트북/행정 존 (700mm) -->
+          <rect x="485" y="90" width="25" height="6" rx="1" fill="#0f172a" stroke="#34d399"/>
+          
+          <!-- 체어 2개 -->
+          <circle cx="435" cy="160" r="13" fill="#312e81" stroke="#6366f1" stroke-width="1.2"/>
+          <circle cx="495" cy="160" r="13" fill="#064e3b" stroke="#10b981" stroke-width="1.2"/>
+          <text x="459" y="122" text-anchor="middle" fill="#e0e7ff" font-size="8" font-weight="bold">1,800mm 코딩 확장 데스크</text>
+          <text x="435" y="180" text-anchor="middle" fill="#a5b4fc" font-size="7">개발 존</text>
+          <text x="495" y="180" text-anchor="middle" fill="#6ee7b7" font-size="7">영양 행정</text>
+
+          <!-- 1,000mm 컴팩트 드레스룸 / 에어드레서 -->
+          <rect x="535" y="86" width="45" height="70" rx="2" fill="#1e293b" stroke="#64748b"/>
+          <text x="557" y="125" text-anchor="middle" fill="#cbd5e1" font-size="7" transform="rotate(-90 557 125)">시스템 드레스룸</text>
+
+          <!-- 작업실 남향 창호 W2 (1,500 × 1,200mm -> 폭 98px) -->
+          <line x1="440" y1="330" x2="538" y2="330" stroke="#38bdf8" stroke-width="4"/>
+          <text x="489" y="342" text-anchor="middle" fill="#38bdf8" font-size="8">W2 (작업실 환기창 1500×1200)</text>
+
+          <!-- 6) 남측 방킬라이 우드 데크 (8,250 × 2,000mm -> 536 × 130px) -->
+          <rect x="60" y="355" width="536" height="110" fill="url(#woodDeckPattern)" stroke="#b45309" stroke-width="1.5"/>
+          <text x="70" y="375" fill="#fef3c7" font-size="9" font-weight="bold">방킬라이 우드 데크 (8,250 × 2,000 mm)</text>
+          <!-- 야외 티테이블 (1,200 × 700mm) 및 벤치 -->
+          <rect x="250" y="380" width="78" height="45" rx="3" fill="#78350f" stroke="#d97706" stroke-width="1.2"/>
+          <rect x="225" y="385" width="18" height="35" rx="2" fill="#451a03"/>
+          <rect x="335" y="385" width="18" height="35" rx="2" fill="#451a03"/>
+          <text x="289" y="407" text-anchor="middle" fill="#fed7aa" font-size="8" font-weight="bold">야외 티테이블</text>
+
+
+          <!-- ================= [2] 복층 다락 평면도 (LOFT FLOOR: 4,000 × 3,300mm = 13.2㎡ / 4.0평) ================= -->
+          <text x="640" y="45" fill="#c084fc" font-size="13" font-weight="bold">【복층 다락 평면도】 4,000 × 3,300 mm (다락 4.0평 / 13.2㎡)</text>
+          <text x="640" y="60" fill="#94a3b8" font-size="10">독립 퀸 수면존 · 1층 소음 차단 · 천창(Skylight) · 계절 침구 수납</text>
+
+          <!-- 다락 외벽 프레임 (260 × 215px) -->
+          <rect x="640" y="70" width="260" height="215" rx="4" fill="#0d1829" stroke="#a855f7" stroke-width="2.5"/>
+          <rect x="650" y="80" width="240" height="195" fill="#061225" stroke="#475569" stroke-width="1.2"/>
+
+          <!-- 상단 다락 치수선 (4,000mm) -->
+          <line x1="640" y1="58" x2="900" y2="58" class="dim-solid" marker-start="url(#woodArrowGreenStart)" marker-end="url(#woodArrowGreenEnd)"/>
+          <text x="770" y="53" text-anchor="middle" fill="#34d399" font-size="9" font-family="monospace">다락 폭: 4,000 mm</text>
+
+          <!-- 계단 상부 오픈 랜딩 및 안전 핸드레일 -->
+          <rect x="650" y="80" width="45" height="75" fill="#1e1b4b" fill-opacity="0.4" stroke="#a855f7" stroke-width="1.2"/>
+          <line x1="695" y1="80" x2="695" y2="155" stroke="#ef4444" stroke-width="2" stroke-dasharray="3 2"/>
+          <text x="672" y="125" text-anchor="middle" fill="#c084fc" font-size="7" transform="rotate(-90 672 125)">계단 랜딩 ▼</text>
+          <text x="702" y="125" fill="#f87171" font-size="7">안전 난간</text>
+
+          <!-- ★ 퀸 침대 (1,500 × 2,000mm -> 98 × 130px) -->
+          <rect x="715" y="85" width="98" height="130" rx="5" fill="#1e3a5f" stroke="#38bdf8" stroke-width="1.5"/>
+          <rect x="723" y="90" width="36" height="22" rx="3" fill="#334155" stroke="#64748b"/>
+          <rect x="769" y="90" width="36" height="22" rx="3" fill="#334155" stroke="#64748b"/>
+          <line x1="715" y1="125" x2="813" y2="125" stroke="#0284c7" stroke-width="1.5"/>
+          <text x="764" y="160" text-anchor="middle" fill="#ffffff" font-size="10" font-weight="bold">퀸 침대 (Queen)</text>
+          <text x="764" y="175" text-anchor="middle" fill="#38bdf8" font-size="9" font-family="monospace">1,500 × 2,000 mm</text>
+
+          <!-- 양측 협탁 (400 × 400mm) -->
+          <rect x="818" y="85" width="26" height="26" rx="2" fill="#334155" stroke="#475569"/>
+          <text x="831" y="101" text-anchor="middle" fill="#94a3b8" font-size="6">협탁</text>
+
+          <!-- 루프 천창 (Skylight: 800 × 600mm -> 52 × 39px) -->
+          <rect x="738" y="195" width="52" height="30" rx="2" fill="#38bdf8" fill-opacity="0.25" stroke="#38bdf8" stroke-width="1.2"/>
+          <text x="764" y="213" text-anchor="middle" fill="#bae6fd" font-size="7" font-weight="bold">천창 (Skylight)</text>
+
+          <!-- 계절 침구 및 의류 로우 수납장 (폭 2,400mm) -->
+          <rect x="660" y="240" width="220" height="28" rx="2" fill="#1e293b" stroke="#475569"/>
+          <text x="770" y="258" text-anchor="middle" fill="#cbd5e1" font-size="8">계절 침구 및 의류 로우 수납장 (폭 2,400mm)</text>
+
+
+          <!-- ================= [3] 하단 건축 비교 & 공법 팩트 분석 카드 ================= -->
+          <g transform="translate(60, 480)">
+            <rect x="0" y="0" width="840" height="240" rx="6" fill="#0a1526" stroke="#1e3250" stroke-width="1.5"/>
+            
+            <text x="20" y="28" fill="#34d399" font-size="13" font-weight="bold">【10평 목조주택 vs 기존 16.4평 컨테이너 하우스 비교 분석표】</text>
+            <text x="470" y="28" fill="#94a3b8" font-size="11">완주 구이 덕천리 477-1 대지 부합 및 실공사 리스크 검증</text>
+
+            <!-- 3대 핵심 비교 박스 -->
+            <!-- 카드 1: 진입로 및 운반 리스크 -->
+            <rect x="15" y="45" width="260" height="175" rx="4" fill="#0d1f38" stroke="#0ea5e9" stroke-width="1"/>
+            <text x="30" y="70" fill="#38bdf8" font-size="11" font-weight="bold">1. 진입로 & 시공 리스크 0%</text>
+            <text x="30" y="95" fill="#f87171" font-size="9" font-weight="bold">▲ 컨테이너 한계:</text>
+            <text x="30" y="110" fill="#94a3b8" font-size="8.5">12m 트레일러 필수 ➔ 마을길 코너·처마 진입 불가</text>
+            <text x="30" y="135" fill="#34d399" font-size="9" font-weight="bold">★ 목조 패널라이징 혁신:</text>
+            <text x="30" y="150" fill="#cbd5e1" font-size="8.5">- 1~2.5톤 소형 화물차로 벽체 패널 분할 반입</text>
+            <text x="30" y="166" fill="#cbd5e1" font-size="8.5">- 현장 목수 직접 조립으로 진입로 제약 100% 해소</text>
+            <text x="30" y="182" fill="#cbd5e1" font-size="8.5">- 열교(Heat Bridge) 제로 및 결로 없는 쾌적성</text>
+
+            <!-- 카드 2: 예산 및 재정 안전성 -->
+            <rect x="290" y="45" width="260" height="175" rx="4" fill="#0d1f38" stroke="#10b981" stroke-width="1"/>
+            <text x="305" y="70" fill="#34d399" font-size="11" font-weight="bold">2. 예산 4,000만 원 (부채 0%)</text>
+            <text x="305" y="95" fill="#cbd5e1" font-size="9"><b>토지</b>: 3,500만 (덕천리 477-1 63.53평 단일필지)</text>
+            <text x="305" y="113" fill="#cbd5e1" font-size="9"><b>농지보전부담금</b>: 343만 원</text>
+            <text x="305" y="131" fill="#cbd5e1" font-size="9"><b>기반/토목/정화조</b>: 1,150만 원</text>
+            <text x="305" y="149" fill="#34d399" font-size="9" font-weight="bold"><b>10평 목조주택(본체+부가세)</b>: 4,000만 원</text>
+            <text x="305" y="167" fill="#cbd5e1" font-size="9"><b>3kW 태양광</b>: 190만 / <b>초기 비상금</b>: <b>177만 원</b></text>
+            <text x="305" y="195" fill="#fbbf24" font-size="9" font-weight="bold">총 9,360만 원 전액 현금 집행 (대출 0원 완결)</text>
+
+            <!-- 카드 3: 2인 거주 공간성 -->
+            <rect x="565" y="45" width="260" height="175" rx="4" fill="#0d1f38" stroke="#a855f7" stroke-width="1"/>
+            <text x="580" y="70" fill="#c084fc" font-size="11" font-weight="bold">3. 실사용 14평 2인 최적화</text>
+            <text x="580" y="95" fill="#cbd5e1" font-size="8.5">- <b>1층 (10평)</b>: 생활·코딩·조리·위생</text>
+            <text x="590" y="112" fill="#94a3b8" font-size="8">1,500mm 아일랜드 + 1,800mm 코딩 데스크</text>
+            <text x="590" y="128" fill="#94a3b8" font-size="8">건식 분리 욕실 + 계단 하부 워시타워 매립</text>
+            <text x="580" y="148" fill="#cbd5e1" font-size="8.5">- <b>복층 다락 (4평)</b>: 독립 수면존</text>
+            <text x="590" y="165" fill="#94a3b8" font-size="8">퀸 침대 + 천창(Skylight) + 계절 침구 수납</text>
+            <text x="580" y="185" fill="#34d399" font-size="8.5" font-weight="bold">1층 생활 소음과 침실 완벽 분리 (수면 질 극대화)</text>
+          </g>
+        </svg>
+      </div>
+
       <!-- 1. Detailed Floor Plan with Accurate Dimensions (Scale: 1,000mm = 75px) -->
-      <div id="viewContainerPlan" class="w-full flex flex-col items-center">
+      <div id="viewContainerPlan" class="w-full flex flex-col items-center hidden">
         <div class="w-full flex justify-between items-center text-xs text-slate-400 mb-3 px-2">
           <span class="font-semibold text-white flex items-center gap-2">
             <span>동 A(공용) + 동 B(프라이빗) 정축척 건축 평면도</span>
@@ -777,29 +1047,27 @@
     <!-- Explanatory Breakdown Cards -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4 text-xs">
       <div class="bg-[var(--background)] border border-[var(--border)] rounded-lg p-3">
-        <span class="text-[11px] font-bold text-emerald-400">1. 퀸 침대 정축척 반영 (1,500 × 2,000mm)</span>
-        <h4 class="font-bold text-white mt-0.5">실제 축척 112px × 150px 렌더링</h4>
+        <span class="text-[11px] font-bold text-emerald-400">1. 진입로 제약 0% 패널라이징 공법</span>
+        <h4 class="font-bold text-white mt-0.5">소형 1~2.5톤 화물차 분할 운반 시공</h4>
         <p class="text-slate-400 mt-1 leading-relaxed">
-          - 3,200 × 3,000mm 침실 면적 대비 퀸 침대가 차지하는 비율을 1:1로 정밀 구현했습니다.<br>
-          - 침대 좌측(100mm) 벽체 이격, 우측(400mm) 무선충전 협탁, 하단(600mm) 붙박이장 개폐 여유 동선을 확보했습니다.
+          - 12~15m 트레일러가 필요한 컨테이너와 달리 <strong>벽체 패널을 1~2.5톤 트럭으로 분할 반입</strong>하여 현장에서 조립합니다.<br>
+          - 완주 구이 덕천리 마을 안길(폭 3~3.5m)의 90도 회전각, 전신주, 이웃집 처마 간섭 리스크를 100% 해소했습니다.
         </p>
       </div>
       <div class="bg-[var(--background)] border border-[var(--border)] rounded-lg p-3">
-        <span class="text-[11px] font-bold text-blue-400">2. 도어 & 창호 전수 규격화</span>
-        <h4 class="font-bold text-white mt-0.5">현관문 1개 단일화 & W1~W7 창호</h4>
+        <span class="text-[11px] font-bold text-blue-400">2. 실사용 14평 2인 입체 공간화</span>
+        <h4 class="font-bold text-white mt-0.5">1층 10평(33㎡) + 복층 다락 4평(13㎡)</h4>
         <p class="text-slate-400 mt-1 leading-relaxed">
-          - <strong>D1 현관문</strong>: 900mm 방화문 (외부 출입문 단일화로 방범 극대화)<br>
-          - <strong>D2/D3</strong>: 1,200mm 중문 + 거실 3m 슬라이딩 파티오 도어<br>
-          - <strong>D4 복도문 삭제</strong>: 문틈 결로·침입 위험 제거 ➔ 완전 벽체화<br>
-          - <strong>W7 복도창</strong>: 1,200 × 800mm 개폐식 턴앤틸트 환기창
+          - <strong>1층 (10평)</strong>: 1,500mm 식탁 아일랜드 + 1,800mm 코딩 데스크 + 건식 욕실 + 계단 하부 세탁·건조기 매립.<br>
+          - <strong>다락 (4평)</strong>: 1층 생활 소음과 분리된 독립 퀸 침실(천창 채광)로 2인 생활 동선 충돌을 원천 차단했습니다.
         </p>
       </div>
       <div class="bg-[var(--background)] border border-[var(--border)] rounded-lg p-3">
-        <span class="text-[11px] font-bold text-amber-400">3. 방킬라이 중정 & 고단열 연결 복도</span>
-        <h4 class="font-bold text-white mt-0.5">150mm 패널벽 + 턴앤틸트 맞바람 환기</h4>
+        <span class="text-[11px] font-bold text-amber-400">3. 총비용 4,000만 원 (부채 0%)</span>
+        <h4 class="font-bold text-white mt-0.5">기존 대비 150만 절감 & 비상금 177만</h4>
         <p class="text-slate-400 mt-1 leading-relaxed">
-          - 통유리와 야외 도어를 완전히 배제하고 <strong>150mm 우레탄 패널 + 징크 지붕</strong>으로 시공했습니다.<br>
-          - 필요 시 <strong>W7 환기창</strong>을 열어 중정의 바람을 통풍시키고, 겨울엔 보일러 난방 연계로 결로가 0%입니다.
+          - 건축비 <strong>4,000만 원(부가세 포함)</strong>으로 기존 예산 대비 150만 원을 절감하여 초기 비상금을 177만 원으로 확충했습니다.<br>
+          - 토지(3,500만) + 인입·기초(1,150만) + 태양광(190만) 포함 총 9,360만 원 전액 현금 집행(대출 0원)을 유지합니다.
         </p>
       </div>
     </div>
@@ -807,18 +1075,23 @@
 
   <script>
     function switchView(view) {
+      const btnWood10P = document.getElementById('btnViewWood10P');
       const btnPlan = document.getElementById('btnViewPlan');
       const btnPlan2P = document.getElementById('btnViewPlan2P');
       const btnConcept = document.getElementById('btnViewConcept');
+      const wood10pContainer = document.getElementById('viewContainerWood10P');
       const planContainer = document.getElementById('viewContainerPlan');
       const plan2PContainer = document.getElementById('viewContainerPlan2P');
       const conceptContainer = document.getElementById('viewContainerConcept');
 
       // 리셋
-      [btnPlan, btnPlan2P, btnConcept].forEach(b => b.className = "px-3 py-1.5 rounded font-medium transition-all text-slate-400 hover:text-white");
-      [planContainer, plan2PContainer, conceptContainer].forEach(c => c.classList.add('hidden'));
+      [btnWood10P, btnPlan, btnPlan2P, btnConcept].forEach(b => b.className = "px-3 py-1.5 rounded font-medium transition-all text-slate-400 hover:text-white");
+      [wood10pContainer, planContainer, plan2PContainer, conceptContainer].forEach(c => c.classList.add('hidden'));
 
-      if (view === 'plan') {
+      if (view === 'wood10p') {
+        btnWood10P.className = "px-3 py-1.5 rounded font-medium transition-all bg-emerald-600 text-white shadow-sm";
+        wood10pContainer.classList.remove('hidden');
+      } else if (view === 'plan') {
         btnPlan.className = "px-3 py-1.5 rounded font-medium transition-all bg-blue-600 text-white shadow-sm";
         planContainer.classList.remove('hidden');
       } else if (view === 'plan2p') {
